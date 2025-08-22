@@ -1,0 +1,290 @@
+﻿<Window x:Class="AppLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Uprix Luncher" Height="640" Width="960"
+        WindowStartupLocation="CenterScreen"
+        Background="#1E1E2E"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Loaded="Window_Loaded"
+        SizeChanged="Window_SizeChanged">
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="AnimatedNavButton">
+            <Setter Property="Background" Value="#2E2E3E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="border" CornerRadius="10">
+                                <Border.Background>
+                                    <LinearGradientBrush x:Name="bgBrush" StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#2E2E3E" Offset="0"/>
+                                        <GradientStop Color="#4A4AFF" Offset="0.5"/>
+                                        <GradientStop Color="#2E2E3E" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                            </Border>
+
+                            <Border>
+                                <Border.Effect>
+                                    <DropShadowEffect x:Name="dropShadow"
+                                              Color="DodgerBlue"
+                                              Opacity="0"
+                                              ShadowDepth="0"
+                                              BlurRadius="15"/>
+                                </Border.Effect>
+                            </Border>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetName="bgBrush"
+                                                 Storyboard.TargetProperty="GradientStops[1].Offset"
+                                                 From="0" To="1"
+                                                 Duration="0:0:1.5"
+                                                 AutoReverse="True"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation To="1.15"
+                                                     Duration="0:0:0.15"
+                                                     Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"/>
+                                            <DoubleAnimation To="1.15"
+                                                     Duration="0:0:0.15"
+                                                     Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"/>
+                                            <DoubleAnimation To="0.7"
+                                                     Duration="0:0:0.2"
+                                                     Storyboard.TargetName="dropShadow"
+                                                     Storyboard.TargetProperty="Opacity"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation To="1"
+                                                     Duration="0:0:0.15"
+                                                     Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"/>
+                                            <DoubleAnimation To="1"
+                                                     Duration="0:0:0.15"
+                                                     Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"/>
+                                            <DoubleAnimation To="0"
+                                                     Duration="0:0:0.2"
+                                                     Storyboard.TargetName="dropShadow"
+                                                     Storyboard.TargetProperty="Opacity"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Canvas x:Name="ParticleCanvas" Background="#1E1E2E"/>
+
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,0,0,14">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" >
+                    <TextBox x:Name="SearchBox"
+                             Width="320" Height="42"
+                             FontSize="16"
+                             VerticalContentAlignment="Center"
+                             Background="#2E2E3E"
+                             Foreground="White"
+                             Padding="12,6"
+                             BorderThickness="0"
+                             TextChanged="SearchBox_TextChanged"
+                             ToolTip="Write the name of the program ...">
+                        <TextBox.Template>
+                            <ControlTemplate TargetType="TextBox">
+                                <Border CornerRadius="10" BorderBrush="Gray" BorderThickness="1" Background="{TemplateBinding Background}">
+                                    <ScrollViewer Margin="0" x:Name="PART_ContentHost" />
+                                </Border>
+                            </ControlTemplate>
+                        </TextBox.Template>
+                        <TextBox.Effect>
+                            <DropShadowEffect Color="#FFF1F1F1" BlurRadius="10" ShadowDepth="0" />
+                        </TextBox.Effect>
+                    </TextBox>
+                </StackPanel>
+                
+                <Button Name="btnTelegram" Width="35" Height="35" Margin="15,5,5,5"
+                        HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Cursor="Hand" Click="btnTelegram_Click"
+                        ToolTip="Open telegram channel">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Border x:Name="border" CornerRadius="10" Background="#FF0075B1">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                                    <Border.Effect>
+                                        <DropShadowEffect x:Name="dropShadow"
+                                              Color="Black"
+                                              Opacity="0"
+                                              ShadowDepth="0"
+                                              BlurRadius="15"/>
+                                    </Border.Effect>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Border Width="25" Height="25">
+                        <Border.Background>
+                            <ImageBrush ImageSource="telegram-icon.png" Stretch="Uniform"/>
+                        </Border.Background>
+                    </Border>
+                </Button>
+                <Button Name="btnGithub" Width="35" Height="35" Margin="0,5,5,5"
+                        Cursor="Hand" Click="btnGithub_Click"
+                        ToolTip="Open application repo">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Border x:Name="border" CornerRadius="10" Background="Black">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                                    <Border.Effect>
+                                        <DropShadowEffect x:Name="dropShadow"
+                                              Color="Black"
+                                              Opacity="0"
+                                              ShadowDepth="0"
+                                              BlurRadius="15"/>
+                                    </Border.Effect>
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="SkyBlue"/>
+                                    <Setter Property="Opacity" Value="0.8"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Border Width="25" Height="25">
+                        <Border.Background>
+                            <ImageBrush ImageSource="github-white-icon.png" Stretch="Uniform"/>
+                        </Border.Background>
+                    </Border>
+                </Button>
+                <Button Name="btnTelephone" Width="35" Height="35" Margin="0,5,5,5"
+                        Cursor="Hand" Click="btnTelephone_Click"
+                        ToolTip="Send Gmail to Developer">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Border x:Name="border" CornerRadius="10" Background="White">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                                    <Border.Effect>
+                                        <DropShadowEffect x:Name="dropShadow"
+                                              Color="Black"
+                                              Opacity="0"
+                                              ShadowDepth="0"
+                                              BlurRadius="15"/>
+                                    </Border.Effect>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Border Width="25" Height="25">
+                        <Border.Background>
+                            <ImageBrush ImageSource="gmail-icon.png" Stretch="Uniform"/>
+                        </Border.Background>
+                    </Border>
+                </Button>
+                <Button Name="btnCheckUpdate" Width="35" Height="35" Margin="0,5,5,5"
+                        Cursor="Hand" Click="btnCheckUpdate_Click"  ToolTip="Update Application">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Border x:Name="border" CornerRadius="10" Background="#FF003AFF">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                                    <Border.Effect>
+                                        <DropShadowEffect x:Name="dropShadow"
+                                              Color="Black"
+                                              Opacity="0"
+                                              ShadowDepth="0"
+                                              BlurRadius="15"/>
+                                    </Border.Effect>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Border Width="25" Height="25">
+                        <Border.Background>
+                            <ImageBrush ImageSource="icons8_submit_progress_1000px.png" Stretch="Uniform"/>
+                        </Border.Background>
+                    </Border>
+                </Button>
+                <TextBlock x:Name="ver"
+                           DockPanel.Dock="Left"
+                           Foreground="#FF89D8AD"
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           Text="Version 1.0.0.0"
+                           Margin="12,0,0,0"/>
+                <TextBlock x:Name="PageLabel"
+                           DockPanel.Dock="Left"
+                           Foreground="#B0B3C0"
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           Text="Page 1 / 1"
+                           Margin="35,0,0,0"/>
+            </DockPanel>
+
+            <ScrollViewer x:Name="Scroller"
+                          Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <WrapPanel x:Name="AppsPanel"
+                           Orientation="Horizontal" Width="auto" Height="auto"
+                           />
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0" >
+                <Button x:Name="PrevBtn" Click="PrevBtn_Click" Width="35" Height="35" Margin="5"
+        Style="{StaticResource AnimatedNavButton}">
+                    <Path Data="M63.94,24.28a14.28,14.28,0,0,0-20.36-20L4.1,44.42a14.27,14.27,0,0,0,0,20l38.69,39.35a14.27,14.27,0,0,0,20.35-20L48.06,68.41l60.66-.29a14.27,14.27,0,1,0-.23-28.54l-59.85.28,15.3-15.58Z"
+          Stretch="Uniform" Fill="White" Width="25" Height="25"/>
+                </Button>
+
+                <Button x:Name="NextBtn" Click="NextBtn_Click" Width="35" Height="35" Margin="5"
+        Style="{StaticResource AnimatedNavButton}">
+                    <Path Data="M58.94,24.28a14.27,14.27,0,0,1,20.35-20l39.49,40.16a14.28,14.28,0,0,1,0,20L80.09,103.79a14.27,14.27,0,1,1-20.35-20L74.82,68.41l-60.67-.29a14.27,14.27,0,0,1,.24-28.54l59.85.28L58.94,24.28Z"
+          Stretch="Uniform" Fill="White" Width="25" Height="25"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

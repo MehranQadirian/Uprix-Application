@@ -1,0 +1,126 @@
+﻿<Window x:Class="AppLauncher.UpdateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Updater"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Width="520" Height="260.8"
+        Background="#141423" WindowStyle="None"
+        AllowsTransparency="False" BorderBrush="#2B2B43" BorderThickness="10"
+        ShowInTaskbar="True">
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="14"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="GitHub Auto-Update"
+                   Foreground="White"
+                   FontSize="20"
+                   FontWeight="SemiBold"/>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="Status:"
+                       Foreground="#93A4FF" Margin="0,0,8,0"/>
+            <TextBlock x:Name="StatusText"
+                       Foreground="White"
+                       Text="Checking latest release…"/>
+        </StackPanel>
+
+        <Border Grid.Row="4" CornerRadius="14" Background="#1E1E33" Padding="16" BorderBrush="#2B2B43" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0">
+                    <TextBlock Text="Progress"
+                               Foreground="#B8BDCF" DockPanel.Dock="Left"/>
+                    <TextBlock x:Name="PercentText"
+                               Text="0%"
+                               Foreground="#FFFFFF" FontWeight="SemiBold"
+                               DockPanel.Dock="Right"/>
+                </DockPanel>
+
+                <Grid Grid.Row="2" Height="10" Background="Transparent" ClipToBounds="True"
+                      SnapsToDevicePixels="True">
+                    <Border CornerRadius="5" Background="#000E0E19" BorderBrush="#343454" BorderThickness="1"/>
+
+                    <Border x:Name="ProgressFill" CornerRadius="5" HorizontalAlignment="Left" Width="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#4C6FFF" Offset="0"/>
+                                <GradientStop Color="#7B9CFF" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.Effect>
+                            <DropShadowEffect Color="#000000" BlurRadius="10" ShadowDepth="0" Opacity="0.35"/>
+                        </Border.Effect>
+                    </Border>
+
+                    <Grid x:Name="IndeterminateShimmer" Visibility="Collapsed" IsHitTestVisible="False">
+                        <Rectangle Opacity="0.35">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#3B3B66" Offset="0"/>
+                                    <GradientStop Color="#6A6AA4" Offset="0.5"/>
+                                    <GradientStop Color="#3B3B66" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <Grid.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                         From="-520" To="520" Duration="0:0:0.5">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Grid.Triggers>
+                        <Grid.RenderTransform>
+                            <TranslateTransform X="-520"/>
+                        </Grid.RenderTransform>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button x:Name="CancelButton" Content="Cancel"
+                    Click="CancelButton_Click" Width="60" Height="35"
+                    Padding="16,6" Margin="8,0,0,0"
+                     Foreground="White" BorderThickness="0"
+                    Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="border" CornerRadius="10" Background="#1E1E33" BorderThickness="1"
+                                    BorderBrush="#2B2B43">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                                <Border.Effect>
+                                    <DropShadowEffect x:Name="dropShadow"
+                                              Color="Black"
+                                              Opacity="0"
+                                              ShadowDepth="0"
+                                              BlurRadius="15"/>
+                                </Border.Effect>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>
