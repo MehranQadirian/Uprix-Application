@@ -45,7 +45,11 @@ This application provides a **faster, cleaner, and customizable way** to access 
 ---
 
 ## 📷 Screenshot
+### Main Window:
 <img width="1183" height="793" alt="image" src="https://github.com/user-attachments/assets/4f473310-c4fe-432f-84a0-6af9f5f79e8e" />
+### Updater:
+<img width="650" height="327" alt="image" src="https://github.com/user-attachments/assets/c682f053-316a-4a75-bcaa-9834fb4efa6f" />
+
 
 ---
 
