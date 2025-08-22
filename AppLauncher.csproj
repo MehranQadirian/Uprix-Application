@@ -37,7 +37,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>I-want-an-icon-for-the-Windows-software-launcher_-Picsart-AiImageEnhancer-_1_-Picsart-AiImageEnhance.ico</ApplicationIcon>
+    <ApplicationIcon>icon-base.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Interop.IWshRuntimeLibrary, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -159,19 +159,16 @@
     <Resource Include="telegram-icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="github-white-icon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="telephone-color-icon.png" />
+    <Resource Include="github-icon.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="gmail-icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="I-want-an-icon-for-the-Windows-software-launcher_-Picsart-AiImageEnhancer-_1_-Picsart-AiImageEnhance.ico" />
+    <Resource Include="icon-base.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="icons8_submit_progress_1000px.png" />
+    <Resource Include="update-icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
