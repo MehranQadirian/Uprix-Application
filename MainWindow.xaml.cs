@@ -17,11 +17,14 @@ using IWshRuntimeLibrary;
 using Brushes = System.Windows.Media.Brushes;
 using Image = System.Windows.Controls.Image;
 using Color = System.Windows.Media.Color;
+using System.Text.Json;
+using System.Net.Http;
 
 namespace AppLauncher
 {
     public partial class MainWindow : Window
     {
+        private const string CurrentVersion = "v1.0.0.0";
         private const double TILE_W = 160;
         private const double TILE_H = 160;
         private const double TILE_MARGIN = 10;
@@ -42,20 +45,65 @@ namespace AppLauncher
             SearchBox.Focus();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            CreateParticles(56);              
-            LoadApps();                        
-            ApplyFilterAndReset();            
-            RecalculatePagination();           
-            RenderCurrentPage();               
+            CreateParticles(56);
+            LoadApps();
+            ApplyFilterAndReset();
+            RecalculatePagination();
+            RenderCurrentPage();
+
+            // بررسی به‌روزرسانی
+            await CheckForUpdateAsync();
         }
+
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             RecalculatePagination();
             ClampPage();
             RenderCurrentPage();
+        }
+        private async Task CheckForUpdateAsync()
+        {
+            try
+            {
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("AppLauncher-VersionCheck");
+                var url = "https://api.github.com/repos/MehranQadirian/Uprix-Application/releases/latest";
+                var res = await client.GetAsync(url);
+                res.EnsureSuccessStatusCode();
+
+                using var stream = await res.Content.ReadAsStreamAsync();
+                var release = await JsonSerializer.DeserializeAsync<GitHubRelease>(stream, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (release != null && release.tag_name != null && release.tag_name != CurrentVersion)
+                {
+                    // اگر نسخه جدید وجود داشت
+                    var notif = new NotificationWindow(
+                        "New version available 🚀",
+$"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
+                        MessageBoxImage.Information)
+                    { Owner = this };
+
+                    notif.ShowNotification();
+                    await Task.Delay(3000).ContinueWith(_ =>
+                    {
+                        Application.Current.Dispatcher.Invoke(() => notif.CloseNotification());
+                    });
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        public class GitHubRelease
+        {
+            public string tag_name { get; set; }
         }
 
         // ---------- Load Apps ----------
