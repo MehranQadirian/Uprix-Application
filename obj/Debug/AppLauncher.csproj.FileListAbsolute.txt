@@ -1,0 +1,40 @@
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\MainWindow.baml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\NotificationWindow.baml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\MainWindow.g.cs
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\NotificationWindow.g.cs
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\App.g.cs
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\AppLauncher.Properties.Resources.resources
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\AppLauncher.csproj.GenerateResource.cache
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\AppLauncher.csproj.CoreCompileInputs.cache
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\Uprix Luncher.exe.config
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\Uprix Luncher.exe
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\Uprix Luncher.pdb
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\Uprix Luncher_MarkupCompile.cache
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\Uprix Luncher.g.resources
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\Uprix Luncher.exe
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\Uprix Luncher.pdb
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\AppLauncher.csprojAssemblyReference.cache
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Data.SQLite.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\AppLauncher.csproj.CopyComplete
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\UpdateWindow.baml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\obj\Debug\UpdateWindow.g.cs
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\Microsoft.Bcl.AsyncInterfaces.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Buffers.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.IO.Pipelines.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Memory.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Numerics.Vectors.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Text.Encodings.Web.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Text.Json.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Threading.Tasks.Extensions.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.ValueTuple.dll
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Buffers.xml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.IO.Pipelines.xml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Memory.xml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Numerics.Vectors.xml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Text.Encodings.Web.xml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Text.Json.xml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.Threading.Tasks.Extensions.xml
+G:\VS Projects\C#\WPF\AppLauncher\AppLauncher\bin\Debug\System.ValueTuple.xml
