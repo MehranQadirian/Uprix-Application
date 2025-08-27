@@ -1,0 +1,197 @@
+﻿<Window x:Class="AppLauncher.AboutUsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AppLauncher"
+        WindowStartupLocation="CenterOwner"
+        mc:Ignorable="d" Background="#FFe9e9e9"
+        Title="AboutUsWindow" Height="550" Width="600" Icon="icon-base.ico">
+    <Window.Resources>
+        <Style x:Key="PathHoverStyle" TargetType="Path">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" 
+                     Value="True">
+                    <DataTrigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation To="#FF9ACA00"
+                                        Duration="0:0:0.3"
+                                        Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </DataTrigger.EnterActions>
+                    <DataTrigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation To="#FF454a35"
+                                        Duration="0:0:0.3"
+                                        Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </DataTrigger.ExitActions>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="Button" x:Key="IconButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" CornerRadius="50" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border.Effect>
+                                <DropShadowEffect x:Name="dropShadow" Color="Black" Opacity="0.5" ShadowDepth="0" BlurRadius="1"/>
+                            </Border.Effect>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="dropShadow"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0.3" Duration="0:0:0.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="dropShadow"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0" Duration="0:0:0.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="About Us"
+                   FontFamily="Segoe UI"
+                   VerticalAlignment="Center"
+                   Margin="15,0,0,0"
+                   FontSize="28"
+                   FontWeight="Bold"
+                   Foreground="#FF454a35"/>
+
+        <Border Grid.Row="1"
+                CornerRadius="15"
+                Padding="10"
+                Margin="15"
+                Background="#FFF"
+                BorderBrush="#DDDDDD"
+                BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="100"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition />
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Ellipse Grid.Column="0" Margin="10">
+                        <Ellipse.Fill>
+                            <ImageBrush ImageSource="icon-base.ico"/>
+                        </Ellipse.Fill>
+
+                    </Ellipse>
+                    <TextBlock Grid.Column="1" Text="Uprix Launcher" FontFamily="Roboto" FontSize="22" FontWeight="Bold" Foreground="#FF454a35"
+                               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                </Grid>
+                <TextBlock Grid.Row="1" Text="This software has the ability to pull out all the software installed on your Windows, and you can explore your software through the search section and run any software you want by double-clicking on it with the mouse."
+                           TextWrapping="Wrap" Foreground="#FF454a35"
+                           FontFamily="Roboto" FontSize="18" FontWeight="Medium" FontStyle="Italic" Margin="15,0"/>
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="V1.0.0.0 ©" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="DarkGray"/>
+                    <TextBlock x:Name="tbStatusUpdate" Grid.Column="1" Text="Update available!" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="#FF454A35" Visibility="Hidden"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="0,10,0,10"
+                    >
+            <Button x:Name="btnTelegram" Width="35" Height="35" Margin="0,5,5,5"
+                        Style="{StaticResource IconButton}"
+                        ToolTip="Open telegram channel"
+                        Background="Transparent"
+                        Click="btnTelegram_Click">
+                <Border Width="25" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Path Data="M21.936,2.444c-0.745-0.521-1.683-0.599-2.506-0.207L1.942,11.449c-1.312,0.691-1.235,2.581,0.116,3.19 c0.289,0.13,0.541,0.228,0.738,0.282l2.144,0.536c0.739,0.186,1.531,0.049,2.167-0.375l9.088-6.979 c0.207-0.158,0.499-0.133,0.673,0.059c0.176,0.19,0.176,0.483,0.001,0.675l-6.544,7.169c-0.292,0.294-0.427,0.676-0.384,1.065 c0.043,0.389,0.257,0.732,0.587,0.942l0.035,0.018l7.945,3.783c1.217,0.58,2.642-0.216,2.788-1.556l1.691-15.531 C23.075,3.82,22.683,2.967,21.936,2.444z"
+                              Stretch="Uniform" Fill="#FF454a35" Stroke="#FF00A9FF" StrokeThickness="0"
+                                      Style="{StaticResource PathHoverStyle}"/>
+                </Border>
+            </Button>
+            <Button x:Name="btnGithub" Width="35" Height="35" Margin="0,5,5,5"
+                        Style="{StaticResource IconButton}"
+                        Background="Transparent"
+                        ToolTip="Open application repo"
+                        Click="btnGithub_Click">
+                <Border Width="25" Height="25">
+                    <Path Data="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z"
+                                  Stretch="Uniform" Fill="#FF454a35" Stroke="Gray" StrokeThickness="0"
+                                      Style="{StaticResource PathHoverStyle}"/>
+                </Border>
+
+            </Button>
+            <Button x:Name="btnTelephone" Width="35" Height="35" Margin="0,5,5,5"
+                        Style="{StaticResource IconButton}"
+                        Background="Transparent"
+                        ToolTip="Send Gmail to Developer"
+                        Click="btnTelephone_Click">
+
+                <Border Width="25" Height="25">
+                    <Path Data="M112 128C85.5 128 64 149.5 64 176C64 191.1 71.1 205.3 83.2 214.4L291.2 370.4C308.3 383.2 331.7 383.2 348.8 370.4L556.8 214.4C568.9 205.3 576 191.1 576 176C576 149.5 554.5 128 528 128L112 128zM64 260L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 260L377.6 408.8C343.5 434.4 296.5 434.4 262.4 408.8L64 260z"
+                              Stretch="Uniform" Fill="#FF454a35" StrokeThickness="0"
+                                      Style="{StaticResource PathHoverStyle}">
+                    </Path>
+                </Border>
+            </Button>
+            <Button x:Name="btnCheckUpdate" Width="35" Height="35" Margin="0,5,5,5"
+                        Style="{StaticResource IconButton}"
+                        Background="Transparent"
+                        ToolTip="Update Application"
+                        Click="btnCheckUpdate_Click">
+                <Border Width="25" Height="25">
+                    <Path Data="M352 96C352 78.3 337.7 64 320 64C302.3 64 288 78.3 288 96L288 306.7L246.6
+                            265.3C234.1 252.8 213.8 252.8 201.3 265.3C188.8 277.8 188.8 298.1 201.3 310.6L297.3
+                            406.6C309.8 419.1 330.1 419.1 342.6 406.6L438.6 310.6C451.1 298.1 451.1 277.8 438.6
+                            265.3C426.1 252.8 405.8 252.8 393.3 265.3L352 306.7L352 96zM160 384C124.7 384 96 412.7
+                            96 448L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 448C544
+                            412.7 515.3 384 480 384L433.1 384L376.5 440.6C345.3 471.8 294.6 471.8 263.4 440.6L206.9
+                            384L160 384zM464 440C477.3 440 488 450.7 488 464C488 477.3 477.3 488 464 488C450.7 488
+                            440 477.3 440 464C440 450.7 450.7 440 464 440z"
+                              Stretch="Uniform" Width="25" Height="25" Fill="#FF454a35" Stroke="#FF00CE12" StrokeThickness="0"
+                                      Style="{StaticResource PathHoverStyle}"/>
+                </Border>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

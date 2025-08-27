@@ -5,8 +5,8 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Width="520" Height="260.8"
-        Background="#141423" WindowStyle="None"
-        AllowsTransparency="False" BorderBrush="#2B2B43" BorderThickness="10"
+        Background="#FF454a35" WindowStyle="None"
+        AllowsTransparency="False"
         ShowInTaskbar="True">
     <Grid Margin="18">
         <Grid.RowDefinitions>
@@ -19,19 +19,19 @@
         </Grid.RowDefinitions>
 
         <TextBlock Text="GitHub Auto-Update"
-                   Foreground="White"
+                   Foreground="#FFe9e9e9"
                    FontSize="20"
                    FontWeight="SemiBold"/>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
             <TextBlock Text="Status:"
-                       Foreground="#93A4FF" Margin="0,0,8,0"/>
+                       Foreground="#FFe9e9e9" Margin="0,0,8,0"/>
             <TextBlock x:Name="StatusText"
-                       Foreground="White"
+                       Foreground="#FFFBc82d"
                        Text="Checking latest release…"/>
         </StackPanel>
 
-        <Border Grid.Row="4" CornerRadius="14" Background="#1E1E33" Padding="16" BorderBrush="#2B2B43" BorderThickness="1">
+        <Border Grid.Row="4" CornerRadius="14" Background="#eee" Padding="16" BorderBrush="#2B2B43" BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -41,22 +41,22 @@
 
                 <DockPanel Grid.Row="0">
                     <TextBlock Text="Progress"
-                               Foreground="#B8BDCF" DockPanel.Dock="Left"/>
+                               Foreground="#FF454a35" DockPanel.Dock="Left"/>
                     <TextBlock x:Name="PercentText"
-                               Text="0%"
-                               Foreground="#FFFFFF" FontWeight="SemiBold"
+                               Text="0%" Margin="10,0"
+                               Foreground="#000" FontWeight="SemiBold"
                                DockPanel.Dock="Right"/>
                 </DockPanel>
 
                 <Grid Grid.Row="2" Height="10" Background="Transparent" ClipToBounds="True"
                       SnapsToDevicePixels="True">
-                    <Border CornerRadius="5" Background="#000E0E19" BorderBrush="#343454" BorderThickness="1"/>
+                    <Border CornerRadius="5" Background="#fff" BorderBrush="#FF454A35" BorderThickness="1"/>
 
                     <Border x:Name="ProgressFill" CornerRadius="5" HorizontalAlignment="Left" Width="0">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#4C6FFF" Offset="0"/>
-                                <GradientStop Color="#7B9CFF" Offset="1"/>
+                                <GradientStop Color="#FF454A35" Offset="0"/>
+                                <GradientStop Color="#FF94C200" Offset="1"/>
                             </LinearGradientBrush>
                         </Border.Background>
                         <Border.Effect>
@@ -68,9 +68,9 @@
                         <Rectangle Opacity="0.35">
                             <Rectangle.Fill>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                    <GradientStop Color="#3B3B66" Offset="0"/>
-                                    <GradientStop Color="#6A6AA4" Offset="0.5"/>
-                                    <GradientStop Color="#3B3B66" Offset="1"/>
+                                    <GradientStop Color="#FF454A35" Offset="0"/>
+                                    <GradientStop Color="#FFC2FF00" Offset="0.5"/>
+                                    <GradientStop Color="#FF454A35" Offset="0.994"/>
                                 </LinearGradientBrush>
                             </Rectangle.Fill>
                         </Rectangle>
@@ -100,13 +100,13 @@
             <Button x:Name="CancelButton" Content="Cancel"
                     Click="CancelButton_Click" Width="60" Height="35"
                     Padding="16,6" Margin="8,0,0,0"
-                     Foreground="White" BorderThickness="0"
+                     Foreground="#FF454a35" BorderThickness="0"
                     Cursor="Hand">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Grid>
-                            <Border x:Name="border" CornerRadius="10" Background="#1E1E33" BorderThickness="1"
-                                    BorderBrush="#2B2B43">
+                            <Border x:Name="border" CornerRadius="10" Background="#FFF" BorderThickness="1"
+                                    BorderBrush="#FFF">
                                 <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"/>
                                 <Border.Effect>

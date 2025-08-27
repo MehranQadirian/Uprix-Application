@@ -7,16 +7,16 @@
         ShowInTaskbar="False"
         SizeToContent="WidthAndHeight"
         Topmost="True">
-    <Border Background="#274483" CornerRadius="8" Padding="12" Margin="8" >
+    <Border Background="#FFe9e9e9" CornerRadius="5" Padding="12" Margin="0" >
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
             <Image x:Name="IconImage" Width="32" Height="32" Margin="0,0,10,0"/>
             <StackPanel>
                 <TextBlock x:Name="CaptionBlock" 
-                           FontWeight="Black" 
-                           Foreground="White" 
+                           FontWeight="Black"
+                           Foreground="#FF454a35" 
                            FontSize="14" FontFamily="Vazirmatn"/>
                 <TextBlock x:Name="TextBlock"
-                           Foreground="LightGray" 
+                           Foreground="Gray" 
                            FontSize="12" 
                            TextWrapping="Wrap" FontFamily="Roboto"/>
             </StackPanel>

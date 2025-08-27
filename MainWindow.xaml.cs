@@ -10,32 +10,33 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Interop;         
-using System.Drawing;                   
-using System.Windows.Shapes;
-using IWshRuntimeLibrary;             
+using System.Windows.Interop;
+using System.Drawing;
+using IWshRuntimeLibrary;
 using Brushes = System.Windows.Media.Brushes;
 using Image = System.Windows.Controls.Image;
 using Color = System.Windows.Media.Color;
 using System.Text.Json;
 using System.Net.Http;
+using System.Windows.Threading;
 
 namespace AppLauncher
 {
     public partial class MainWindow : Window
     {
-        private const string CurrentVersion = "v1.0.0.0";
+        private const string CurrentVersion = "v2.0.0.0";
         private const double TILE_W = 160;
         private const double TILE_H = 160;
         private const double TILE_MARGIN = 10;
+        private bool recalcScheduled = false;
 
         private readonly List<AppModel> allApps = new List<AppModel>();
         private List<AppModel> filteredApps = new List<AppModel>();
         private readonly Dictionary<string, ImageSource> iconCache = new Dictionary<string, ImageSource>();
-
+        TextBlock appsName;
         private int currentPage = 0;
-        private int itemsPerPage = 12;  
-
+        private int itemsPerPage = 12;
+        private bool isUpdateAvailable = false;
         private readonly Random rand = new Random();
         private Button selectedButton;
 
@@ -43,20 +44,28 @@ namespace AppLauncher
         {
             InitializeComponent();
             SearchBox.Focus();
+            this.StateChanged += Window_StateChanged;
         }
-
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                RecalculatePagination();
+                ClampPage();
+                RenderCurrentPage();
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+            
+        }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            CreateParticles(56);
+            ApplyTheme();
             LoadApps();
             ApplyFilterAndReset();
             RecalculatePagination();
             RenderCurrentPage();
 
-            // بررسی به‌روزرسانی
             await CheckForUpdateAsync();
         }
-
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -64,6 +73,7 @@ namespace AppLauncher
             ClampPage();
             RenderCurrentPage();
         }
+
         private async Task CheckForUpdateAsync()
         {
             try
@@ -80,15 +90,11 @@ namespace AppLauncher
                     PropertyNameCaseInsensitive = true
                 });
 
-                if (release != null && release.tag_name != null && release.tag_name != CurrentVersion)
+                if (release != null && release.Tag_name != null && release.Tag_name != CurrentVersion)
                 {
-                    // اگر نسخه جدید وجود داشت
-                    var notif = new NotificationWindow(
-                        "New version available 🚀",
-$"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
-                        MessageBoxImage.Information)
-                    { Owner = this };
-
+                    isUpdateAvailable = true;
+                    NotificationWindow notif = new NotificationWindow("Update Available", $"New version available: {release.Tag_name}\nCurrent version: {CurrentVersion}"
+                        , MessageBoxImage.Information);
                     notif.ShowNotification();
                     await Task.Delay(3000).ContinueWith(_ =>
                     {
@@ -96,17 +102,17 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
                     });
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error in CheckForUpdateAsync: {ex.Message}");
             }
         }
 
         public class GitHubRelease
         {
-            public string tag_name { get; set; }
+            public string Tag_name { get; set; }
         }
 
-        // ---------- Load Apps ----------
         private void LoadApps()
         {
             string startMenu = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
@@ -131,9 +137,11 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
             {
                 foreach (var shortcut in Directory.GetFiles(root, "*.lnk", SearchOption.AllDirectories))
                     TryAddShortcut(shortcut);
+                
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error in EnumerateShortcutsSafe for {root}: {ex.Message}");
             }
         }
 
@@ -151,15 +159,18 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
                         Path = lnk.TargetPath
                     });
                 }
+
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error in TryAddShortcut for {path}: {ex.Message}");
             }
         }
 
-        // ---------- Filtering & Pagination ----------
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (SearchBox.Text == "") SearchBox.Background = new SolidColorBrush(Colors.Transparent);
+            else SearchBox.Background = new SolidColorBrush(Colors.White);
             ApplyFilterAndReset();
             RenderCurrentPage();
         }
@@ -181,8 +192,26 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
 
         private void RecalculatePagination()
         {
-            double availableW = Math.Max(0, AppsPanel.ActualWidth);
-            if (availableW <= 0) availableW = Scroller.ActualWidth;
+            if (Scroller == null) return;
+
+            bool viewportReady = Scroller.ViewportHeight > 1 && Scroller.ViewportWidth > 1;
+            if (!viewportReady)
+            {
+                if (!recalcScheduled)
+                {
+                    recalcScheduled = true;
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        recalcScheduled = false;
+                        RecalculatePagination();
+                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }
+                return;
+            }
+
+            int newItemsPerPage;
+            double availableW = Math.Max(0, Scroller.ViewportWidth);
+            if (availableW <= 0) availableW = Scroller.ViewportWidth;
             double availableH = Math.Max(0, Scroller.ViewportHeight);
             if (availableH <= 0) availableH = Scroller.ActualHeight - 2;
             double tileTotalW = TILE_W + 2 * TILE_MARGIN;
@@ -191,8 +220,15 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
             int cols = Math.Max(1, (int)(availableW / tileTotalW));
             int rows = Math.Max(1, (int)(availableH / tileTotalH));
 
-            itemsPerPage = Math.Max(1, cols * rows);
-            UpdatePageLabel();
+            newItemsPerPage = Math.Max(1, cols * rows);
+
+            if (newItemsPerPage != itemsPerPage)
+            {
+                itemsPerPage = newItemsPerPage;
+                ClampPage();
+                UpdatePageLabel();
+                RenderCurrentPage();
+            }
         }
 
         private void ClampPage()
@@ -203,26 +239,17 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
 
             PrevBtn.IsEnabled = currentPage > 0;
             NextBtn.IsEnabled = currentPage < totalPages - 1;
-            // PrevBtn Visiblity
-            if (!PrevBtn.IsEnabled) PrevBtn.Visibility = PrevBtn.Visibility = Visibility.Hidden;
-            else PrevBtn.Visibility = PrevBtn.Visibility = Visibility.Visible;
-            // NextBtn Visiblity
-            if (!NextBtn.IsEnabled) NextBtn.Visibility = NextBtn.Visibility = Visibility.Hidden;
-            else NextBtn.Visibility = NextBtn.Visibility = Visibility.Visible;
-            if (currentPage > 0 || currentPage < totalPages - 1) UpdatePageLabel();
+            PrevBtn.Visibility = currentPage > 0 ? Visibility.Visible : Visibility.Hidden;
+            NextBtn.Visibility = currentPage < totalPages - 1 ? Visibility.Visible : Visibility.Hidden;
+            UpdatePageLabel();
         }
 
         private void UpdatePageLabel()
         {
             int totalPages = Math.Max(1, (int)Math.Ceiling((double)filteredApps.Count / Math.Max(1, itemsPerPage)));
-            if (currentPage + 1 > 0)
-            {
-                int pageNumber = currentPage + 1;
-                PageLabel.Text = $"Page {pageNumber} / {totalPages}";
-            }
+            PageLabel.Text = $"{currentPage + 1} / {totalPages}";
         }
 
-        // ---------- Render ----------
         private void RenderCurrentPage()
         {
             AppsPanel.Children.Clear();
@@ -232,45 +259,34 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
                 var noAppText = new TextBlock
                 {
                     Text = "No program found.",
-                    Foreground = Brushes.White,
+                    Foreground = new SolidColorBrush(Color.FromRgb(69, 74, 53)),
                     Margin = new Thickness(8),
-                    FontSize = 16,
-                    Opacity = 0
+                    FontSize = 16
                 };
-
                 AppsPanel.Children.Add(noAppText);
-
-                var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(300));
-                noAppText.BeginAnimation(OpacityProperty, fadeIn);
-
                 UpdatePageLabel();
                 return;
             }
-
             ClampPage();
-
             int start = currentPage * itemsPerPage;
             int end = Math.Min(start + itemsPerPage, filteredApps.Count);
-
+            AppsPanel.Visibility = Visibility.Visible;
             for (int i = start; i < end; i++)
             {
                 var app = filteredApps[i];
                 var tile = CreateTile(app);
-
                 tile.Opacity = 0;
                 tile.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
-                tile.RenderTransform = new TranslateTransform { X = 40, Y = 0 };
-
+                tile.RenderTransform = new TranslateTransform { X = 40 };
                 AppsPanel.Children.Add(tile);
-
-                var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(300))
+                var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(200))
                 {
-                    BeginTime = TimeSpan.FromMilliseconds(50 * (i - start)) 
+                    BeginTime = TimeSpan.FromMilliseconds(8 * (i - start))
                 };
 
-                var slide = new DoubleAnimation(40, 0, TimeSpan.FromMilliseconds(300))
+                var slide = new DoubleAnimation(40, 0, TimeSpan.FromMilliseconds(200))
                 {
-                    BeginTime = TimeSpan.FromMilliseconds(50 * (i - start)),
+                    BeginTime = TimeSpan.FromMilliseconds(8 * (i - start)),
                     EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
                 };
 
@@ -279,7 +295,6 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
             }
         }
 
-        // ---------- Tile UI ----------
         private FrameworkElement CreateTile(AppModel app)
         {
             var panel = new StackPanel
@@ -290,8 +305,8 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
 
             var img = new Image
             {
-                Width = 48,
-                Height = 48,
+                Width = 50,
+                Height = 50,
                 Margin = new Thickness(0, 0, 0, 8),
                 Opacity = 0.9
             };
@@ -303,30 +318,28 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
             else
             {
                 img.Source = null;
-
                 _ = Task.Run(() =>
                 {
                     var icon = TryLoadIcon(app.Path);
                     if (icon != null)
                     {
                         iconCache[app.Path] = icon;
-                        Dispatcher.Invoke(() =>
-                        {
-                            img.Source = icon;
-                        }, System.Windows.Threading.DispatcherPriority.Background);
+                        Dispatcher.Invoke(() => img.Source = icon,DispatcherPriority.Background);
                     }
                 });
             }
 
             var txt = new TextBlock
             {
+                Name = "appsName",
                 Text = app.Name,
-                Foreground = Brushes.White,
+                Foreground = new SolidColorBrush(Color.FromRgb(69, 74, 53)),
+                FontWeight = FontWeights.Bold,
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap,
                 MaxWidth = TILE_W - 16
             };
-
+            appsName = txt;
             panel.Children.Add(img);
             panel.Children.Add(txt);
 
@@ -336,136 +349,129 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
                 Width = TILE_W,
                 Height = TILE_H,
                 Margin = new Thickness(TILE_MARGIN),
-                Background = new SolidColorBrush(Color.FromRgb(46, 46, 62)),
-                BorderThickness = new Thickness(0),
-                Cursor = Cursors.Hand,
-                Tag = app,
-                Opacity = 0
+                Style = FindResource("ModernTileButton") as Style,
+                Tag = app
             };
-
-            btn.Template = CreateCardStyle();
-
-            btn.MouseEnter += (s, e) => AnimateScale(btn, 1.07);
-            btn.MouseLeave += (s, e) => AnimateScale(btn, selectedButton == btn ? 1.03 : 1.0);
 
             btn.Click += (s, e) => SelectButton(btn);
-
-            btn.MouseDoubleClick += (s, e) =>
-            {
-                try
-                {
-                    var notif = new NotificationWindow("Runing", $"{app.Name} is runing", MessageBoxImage.None) { Owner = this };
-                    notif.ShowNotification();
-                    Task.Delay(3000).ContinueWith(_ =>
-                    {
-                        Application.Current.Dispatcher.Invoke(() => notif.CloseNotification());
-                        if (notif.IsNotificationVisible) Process.Start(new ProcessStartInfo(app.Path) { UseShellExecute = true });
-                    });
-                }
-                catch (Exception ex)
-                {
-                    var notif = new NotificationWindow($"Error executing {app.Name} program", $"{ex.Message}", MessageBoxImage.Error) { Owner = this };
-                    notif.ShowNotification();
-                    Task.Delay(3000).ContinueWith(_ =>
-                    {
-                        Application.Current.Dispatcher.Invoke(() => notif.CloseNotification());
-                    });
-                }
-            };
+            btn.MouseDoubleClick += LaunchApp;
 
             return btn;
         }
 
-        private ControlTemplate CreateCardStyle()
+        private FrameworkElement CreateListItem(AppModel app)
         {
-            var template = new ControlTemplate(typeof(Button));
-            var border = new FrameworkElementFactory(typeof(Border));
-            border.SetValue(Border.CornerRadiusProperty, new CornerRadius(14));
-            border.SetValue(Border.SnapsToDevicePixelsProperty, true);
-            border.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Button.BackgroundProperty));
-            border.SetValue(Border.EffectProperty, new System.Windows.Media.Effects.DropShadowEffect
+            var grid = new Grid
             {
-                Color = Colors.Black,
-                BlurRadius = 10,
-                Opacity = 0.28,
-                ShadowDepth = 2
-            });
+                Height = 40,
+                Margin = new Thickness(5)
+            };
 
-            var content = new FrameworkElementFactory(typeof(ContentPresenter));
-            content.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Center);
-            content.SetValue(VerticalAlignmentProperty, VerticalAlignment.Center);
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            border.AppendChild(content);
-            template.VisualTree = border;
+            var img = new Image
+            {
+                Width = 32,
+                Height = 32,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(5, 0, 10, 0)
+            };
 
-            return template;
+            if (iconCache.TryGetValue(app.Path, out var cached))
+            {
+                img.Source = cached;
+            }
+            else
+            {
+                img.Source = null;
+                _ = Task.Run(() =>
+                {
+                    var icon = TryLoadIcon(app.Path);
+                    if (icon != null)
+                    {
+                        iconCache[app.Path] = icon;
+                        Dispatcher.Invoke(() => img.Source = icon, System.Windows.Threading.DispatcherPriority.Background);
+                    }
+                });
+            }
+
+            Grid.SetColumn(img, 0);
+
+            var txt = new TextBlock
+            {
+                Text = app.Name,
+                Foreground = Brushes.White,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 14
+            };
+
+            Grid.SetColumn(txt, 1);
+
+            grid.Children.Add(img);
+            grid.Children.Add(txt);
+
+            var btn = new Button
+            {
+                Content = grid,
+                Style = FindResource("ClassicListItemButton") as Style,
+                Tag = app
+            };
+
+            btn.Click += (s, e) => SelectButton(btn);
+            btn.MouseDoubleClick += LaunchApp;
+
+            return btn;
         }
 
         private void SelectButton(Button btn)
         {
-            foreach (var child in AppsPanel.Children.OfType<Button>())
+            if (selectedButton != null)
             {
-                if (child == btn) continue;
-                child.Background = new SolidColorBrush(Color.FromRgb(46, 46, 62));
-                AnimateScale(child, 1.0);
+                selectedButton.Style = FindResource("ModernTileButton") as Style;
             }
 
             selectedButton = btn;
-
-            var brush = new SolidColorBrush(Color.FromRgb(12, 0, 102));
-            btn.Background = brush;
-
-            var pulse = new ColorAnimation(Color.FromRgb(0, 19, 163),
-                                           TimeSpan.FromMilliseconds(400))
-            {
-                AutoReverse = true,
-                RepeatBehavior = RepeatBehavior.Forever
-            };
-            brush.BeginAnimation(SolidColorBrush.ColorProperty, pulse);
-
-            AnimateScale(btn, 1.03);
+            btn.Style = FindResource("ModernTileButtonSelected") as Style;
         }
 
-        private void AnimateScale(UIElement element, double scale)
+        private void LaunchApp(object sender, MouseButtonEventArgs e)
         {
-            if (!(element.RenderTransform is ScaleTransform t))
+            if (sender is Button btn && btn.Tag is AppModel app)
             {
-                t = new ScaleTransform(1, 1);
-                element.RenderTransform = t;
-                element.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+                try
+                {
+                    Process.Start(new ProcessStartInfo(app.Path) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error executing {app.Name}: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-
-            var ax = new DoubleAnimation(scale, TimeSpan.FromMilliseconds(120)) { EasingFunction = new QuadraticEase() };
-            var ay = new DoubleAnimation(scale, TimeSpan.FromMilliseconds(120)) { EasingFunction = new QuadraticEase() };
-            t.BeginAnimation(ScaleTransform.ScaleXProperty, ax);
-            t.BeginAnimation(ScaleTransform.ScaleYProperty, ay);
         }
 
-        // ---------- Async Icon ----------
         private ImageSource TryLoadIcon(string exePath)
         {
             try
             {
-                using (Icon icon = System.Drawing.Icon.ExtractAssociatedIcon(exePath))
-                {
-                    if (icon == null) return null;
+                using Icon icon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
+                if (icon == null) return null;
 
-                    var src = Imaging.CreateBitmapSourceFromHIcon(
-                        icon.Handle,
-                        Int32Rect.Empty,
-                        BitmapSizeOptions.FromWidthAndHeight(48, 48));
+                var src = Imaging.CreateBitmapSourceFromHIcon(
+                    icon.Handle,
+                    Int32Rect.Empty,
+                    BitmapSizeOptions.FromWidthAndHeight(48, 48));
 
-                    src.Freeze();
-                    return src;
-                }
+                src.Freeze();
+                return src;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error in TryLoadIcon for {exePath}: {ex.Message}");
                 return null;
             }
         }
 
-        // ---------- Pager (Buttons & Keyboard) ----------
         private void PrevBtn_Click(object sender, RoutedEventArgs e)
         {
             if (currentPage > 0)
@@ -504,132 +510,36 @@ $"Current version: {CurrentVersion}\nNew version: {release.tag_name}",
                 e.Handled = true;
             }
         }
-
-        // ---------- Particles (Lightweight) ----------
-        private void CreateParticles(int count)
+        private void ApplyTheme()
         {
-            ParticleCanvas.Children.Clear();
+            SearchBox.Effect = new System.Windows.Media.Effects.DropShadowEffect { Color = Colors.White, BlurRadius = 5, ShadowDepth = 0 };
+            SearchBox.Background = new SolidColorBrush(Colors.Transparent);
+            SearchBox.Foreground = new SolidColorBrush(Color.FromRgb(69, 74, 53));
+            SearchBox.BorderThickness = new Thickness(0);
+            this.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+            PrevBtn.Style = FindResource("AnimatedNavButton") as Style;
+            NextBtn.Style = FindResource("AnimatedNavButton") as Style;
+            brSearchBox.Style = FindResource("BorderSearchBox") as Style;
+            Scroller.CanContentScroll = false;
 
-            for (int i = 0; i < count; i++)
-            {
-                var x = rand.Next(3, 7);
-                var dot = new Ellipse
-                {
-                    Width = x,
-                    Height = x,
-                    Fill = Brushes.White,
-                    Opacity = 0.22
-                };
-
-                double startX = rand.Next((int)Math.Max(1, ParticleCanvas.ActualWidth));
-                double startY = rand.Next((int)Math.Max(1, ParticleCanvas.ActualHeight));
-
-                Canvas.SetLeft(dot, startX);
-                Canvas.SetTop(dot, startY);
-
-                ParticleCanvas.Children.Add(dot);
-
-                var dur = TimeSpan.FromSeconds(rand.Next(9, 34));
-                var anim = new DoubleAnimation(startY, -12, dur)
-                {
-                    RepeatBehavior = RepeatBehavior.Forever
-                };
-                dot.BeginAnimation(Canvas.TopProperty, anim);
-
-                var fade = new DoubleAnimation(0.12, 0.28, TimeSpan.FromSeconds(rand.Next(6, 12)))
-                {
-                    AutoReverse = true,
-                    RepeatBehavior = RepeatBehavior.Forever
-                };
-                dot.BeginAnimation(UIElement.OpacityProperty, fade);
-            }
-        }
-        private void CheckUpdateNow()
-        {
-            var win = new UpdateWindow { Owner = this };
-            win.ShowDialog();
+            ParticleCanvas.Background = new SolidColorBrush(Color.FromRgb(233, 233, 233));
+            RecalculatePagination();
         }
 
-        private void btnCheckUpdate_Click(object sender, RoutedEventArgs e)
+        private void BtnAboutUs_Click(object sender, RoutedEventArgs e)
         {
-            CheckUpdateNow();
+            AboutUsWindow aboutUsWindow = new AboutUsWindow() { Owner =  this};
+            aboutUsWindow.tbStatusUpdate.Visibility = isUpdateAvailable ? Visibility.Visible : Visibility.Hidden;
+            aboutUsWindow.Show();
+            Show();
         }
-        private void btnTelegram_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "https://t.me/UprixApplication",
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to open Telegram link:\n" + ex.Message);
-            }
-        }
-
-        private void btnGithub_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "https://github.com/MehranQadirian/Uprix-Application",
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to open GitHub link:\n" + ex.Message);
-            }
-        }
-
-        private void btnTelephone_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                string machineName = Environment.MachineName;
-                string userName = Environment.UserName;
-                string osVersion = Environment.OSVersion.ToString();
-                string dotnetVersion = Environment.Version.ToString();
-
-                string subject = Uri.EscapeDataString("Uprix Application - Support Request");
-                string body = Uri.EscapeDataString(
-                    $"Hello Uprix Team" +
-                    $"\nI need support regarding the Uprix Application" +
-                    $"\nMachine Name: {machineName}" +
-                    $"\nUser Name: {userName}" +
-                    $"\nOS Version: {osVersion}" +
-                    $"\n.NET Version: {dotnetVersion}" +
-                    $"\n\n\n[Please describe your issue here... <Persian or English> ]:\n\n\t"
-                );
-
-                string gmailUrl = $"https://mail.google.com/mail/?view=cm&fs=1" +
-                                  $"&to=mehranghadirian01@gmail.com" +
-                                  $"&su={subject}" +
-                                  $"&body={body}";
-
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = gmailUrl,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to open Gmail:\n" + ex.Message);
-            }
-        }
-
     }
 
-    // ---------- Model ----------
     public class AppModel
     {
         public string Name { get; set; }
         public string Path { get; set; }
-        public ImageSource Icon { get; set; } 
+        public ImageSource Icon { get; set; }
     }
+
 }
