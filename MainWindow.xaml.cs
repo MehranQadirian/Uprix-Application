@@ -25,7 +25,7 @@ namespace AppLauncher
 {
     public partial class MainWindow : Window
     {
-        private const string CurrentVersion = "v2.0.0.0";
+        private const string CurrentVersion = "v2.0.0.1";
         private const double TILE_W = 160;
         private const double TILE_H = 160;
         private const double TILE_MARGIN = 10;
