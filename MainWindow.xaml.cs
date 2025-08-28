@@ -19,6 +19,7 @@ using Color = System.Windows.Media.Color;
 using System.Text.Json;
 using System.Net.Http;
 using System.Windows.Threading;
+using System.ComponentModel;
 
 namespace AppLauncher
 {
@@ -45,7 +46,14 @@ namespace AppLauncher
             InitializeComponent();
             SearchBox.Focus();
             this.StateChanged += Window_StateChanged;
+            this.Closing += Window_Closing;
         }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
         private void Window_StateChanged(object sender, EventArgs e)
         {
             Dispatcher.BeginInvoke(new Action(() =>

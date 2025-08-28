@@ -69,7 +69,7 @@ namespace AppLauncher
 
                 try
                 {
-                    if (_downloadedFile.EndsWith(".msi", StringComparison.OrdinalIgnoreCase))
+                    if (_downloadedFile.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                     {
                         var psi = new ProcessStartInfo("msiexec.exe", $"/i \"{_downloadedFile}\"")
                         {
