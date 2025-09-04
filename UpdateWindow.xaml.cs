@@ -13,14 +13,18 @@ namespace AppLauncher
 {
     public partial class UpdateWindow : Window
     {
+        #region Variables
         private new const string Owner = "MehranQadirian"; 
         private const string Repo = "Uprix-Application"; 
-        private const string AssetNameFilter = "Setup"; 
-
+        private const string AssetNameFilter = "Setup";
+        private static readonly HttpClient Http = new HttpClient();
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private double _progressMaxWidth; 
         private string _downloadedFile;
-
+        private MainWindow main = new MainWindow();
+        private string userName = Environment.UserName;
+        #endregion
+        #region Methods
         public UpdateWindow()
         {
             InitializeComponent();
@@ -30,6 +34,18 @@ namespace AppLauncher
 
         private async void UpdateWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("AppLauncher-VersionCheck");
+            var url = "https://api.github.com/repos/MehranQadirian/Uprix-Application/releases/latest";
+            var res = await client.GetAsync(url);
+            res.EnsureSuccessStatusCode();
+
+            using var stream = await res.Content.ReadAsStreamAsync();
+            var release = await JsonSerializer.DeserializeAsync<GitHubReleaseUpdate>(stream, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
             _progressMaxWidth = GetProgressTrackWidth();
             SetIndeterminate(true, "Checking latest release…");
 
@@ -41,7 +57,19 @@ namespace AppLauncher
                     SetIndeterminate(false, "No release found.");
                     return;
                 }
-
+                var githubVersionStr = rel.tag_name.TrimStart('v');
+                var currentVersionStr = main.CurrentVersion.TrimStart('v');
+                if (Version.TryParse(githubVersionStr, out var githubVersion) &&
+    Version.TryParse(currentVersionStr, out var currentVersion))
+                {
+                    if (githubVersion <= currentVersion)
+                    {
+                        SetIndeterminate(false, $"You already have the latest version ({currentVersion}).");
+                        await Task.Delay(5000);
+                        Close();
+                        return;
+                    }
+                }
                 var asset = PickAsset(rel);
                 if (asset == null)
                 {
@@ -87,6 +115,7 @@ namespace AppLauncher
                         };
                         Process.Start(psi);
                     }
+                    await main.SendMessageAsync($"{userName} is trying to upgrade version {main.CurrentVersion} to version {release.tag_name}", "", "normal");
                 }
                 catch (Exception ex)
                 {
@@ -118,9 +147,7 @@ namespace AppLauncher
             }
         }
 
-        private static readonly HttpClient Http = new HttpClient();
-
-        private async Task<GitHubRelease> GetLatestReleaseAsync(CancellationToken ct)
+        private async Task<GitHubReleaseUpdate> GetLatestReleaseAsync(CancellationToken ct)
         {
             var url = $"https://api.github.com/repos/{Owner}/{Repo}/releases/latest";
 
@@ -131,14 +158,14 @@ namespace AppLauncher
             res.EnsureSuccessStatusCode();
 
             using var stream = await res.Content.ReadAsStreamAsync();
-            var rel = await JsonSerializer.DeserializeAsync<GitHubRelease>(stream, new JsonSerializerOptions
+            var rel = await JsonSerializer.DeserializeAsync<GitHubReleaseUpdate>(stream, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
             return rel;
         }
 
-        private GitHubAsset PickAsset(GitHubRelease rel)
+        private GitHubAsset PickAsset(GitHubReleaseUpdate rel)
         {
             if (rel?.assets == null || rel.assets.Length == 0) return null;
 
@@ -240,9 +267,10 @@ namespace AppLauncher
             try { _cts.Cancel(); } catch { }
             Close();
         }
+        #endregion
     }
 
-    public class GitHubRelease
+    public class GitHubReleaseUpdate
     {
         public string tag_name { get; set; }
         public GitHubAsset[] assets { get; set; }

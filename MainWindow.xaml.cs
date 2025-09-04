@@ -20,17 +20,149 @@ using System.Text.Json;
 using System.Net.Http;
 using System.Windows.Threading;
 using System.ComponentModel;
+using System.Data.SQLite;
 
 namespace AppLauncher
 {
+    public class GitHubRelease
+    {
+        public string Tag_name { get; set; }
+    }
+
+    public static class DatabaseHelper
+    {
+        private static readonly string DbPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "AppLauncher", "apps.db");
+
+        private static readonly string ConnectionString = $"Data Source={DbPath};Version=3;";
+
+        static DatabaseHelper()
+        {
+            InitializeDatabase();
+        }
+
+        private static void InitializeDatabase()
+        {
+            try
+            {
+                var dir = Path.GetDirectoryName(DbPath);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                if (!System.IO.File.Exists(DbPath))
+                    SQLiteConnection.CreateFile(DbPath);
+
+                using var conn = new SQLiteConnection(ConnectionString);
+                conn.Open();
+
+                string createTable = @"
+                    CREATE TABLE IF NOT EXISTS Apps (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        Name TEXT NOT NULL,
+                        Path TEXT NOT NULL UNIQUE
+                    );";
+
+                using var cmd = new SQLiteCommand(createTable, conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error initializing database: " + ex.Message);
+            }
+        }
+
+        public static List<AppModel> LoadAppsFromDb()
+        {
+            var apps = new List<AppModel>();
+            try
+            {
+                using var conn = new SQLiteConnection(ConnectionString);
+                conn.Open();
+
+                string sql = "SELECT Name, Path FROM Apps ORDER BY Name COLLATE NOCASE;";
+                using var cmd = new SQLiteCommand(sql, conn);
+                using var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    apps.Add(new AppModel
+                    {
+                        Name = reader.GetString(0),
+                        Path = reader.GetString(1)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error loading apps from DB: " + ex.Message);
+            }
+            return apps;
+        }
+
+        public static void SaveAppsToDb(List<AppModel> apps)
+        {
+            try
+            {
+                using var conn = new SQLiteConnection(ConnectionString);
+                conn.Open();
+
+                using var tran = conn.BeginTransaction();
+                string insertSql = "INSERT OR IGNORE INTO Apps (Name, Path) VALUES (@Name, @Path);";
+
+                using var cmd = new SQLiteCommand(insertSql, conn);
+                cmd.Parameters.Add(new SQLiteParameter("@Name"));
+                cmd.Parameters.Add(new SQLiteParameter("@Path"));
+
+                foreach (var app in apps)
+                {
+                    cmd.Parameters["@Name"].Value = app.Name;
+                    cmd.Parameters["@Path"].Value = app.Path;
+                    cmd.ExecuteNonQuery();
+                }
+
+                tran.Commit();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error saving apps to DB: " + ex.Message);
+            }
+        }
+
+        public static void ClearAppsDb()
+        {
+            try
+            {
+                using var conn = new SQLiteConnection(ConnectionString);
+                conn.Open();
+                using var cmd = new SQLiteCommand("DELETE FROM Apps;", conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error clearing DB: " + ex.Message);
+            }
+        }
+    }
+
+    public class AppModel
+    {
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public ImageSource Icon { get; set; }
+        public bool IsFavorite { get; set; }   // ⭐️ جدید
+    }
+
     public partial class MainWindow : Window
     {
-        private const string CurrentVersion = "v2.0.0.1";
+        #region Variables
+        public string CurrentVersion = "v2.3.0.1";
         private const double TILE_W = 160;
         private const double TILE_H = 160;
         private const double TILE_MARGIN = 10;
         private bool recalcScheduled = false;
-
+        private static readonly HttpClient client = new HttpClient();
+        private readonly string baseUrl = "https://restless-lab-609b.nexlifytodo.workers.dev/";
         private readonly List<AppModel> allApps = new List<AppModel>();
         private List<AppModel> filteredApps = new List<AppModel>();
         private readonly Dictionary<string, ImageSource> iconCache = new Dictionary<string, ImageSource>();
@@ -40,15 +172,19 @@ namespace AppLauncher
         private bool isUpdateAvailable = false;
         private readonly Random rand = new Random();
         private Button selectedButton;
-
+        private readonly string machineName = Environment.MachineName;
+        private readonly string userName = Environment.UserName;
+        #endregion
+        #region Methods
         public MainWindow()
         {
             InitializeComponent();
+            
             SearchBox.Focus();
             this.StateChanged += Window_StateChanged;
             this.Closing += Window_Closing;
         }
-
+        
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             Application.Current.Shutdown();
@@ -62,16 +198,25 @@ namespace AppLauncher
                 ClampPage();
                 RenderCurrentPage();
             }), System.Windows.Threading.DispatcherPriority.Loaded);
-            
+
         }
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ApplyTheme();
-            LoadApps();
+
+            var progressWindow = new ProgressWindow();
+            progressWindow.Show();
+
+            var progress = new Progress<string>(status => progressWindow.UpdateStatus(status));
+            await LoadAppsAsync(progress);
+
+            progressWindow.Close();
+
             ApplyFilterAndReset();
             RecalculatePagination();
             RenderCurrentPage();
-
+            await SendMessageAsync($"{userName} Running and using {CurrentVersion}", "", "low");
             await CheckForUpdateAsync();
         }
 
@@ -80,6 +225,35 @@ namespace AppLauncher
             RecalculatePagination();
             ClampPage();
             RenderCurrentPage();
+        }
+
+        public async Task<string> SendMessageAsync(string message, string source = "", string priority = "normal")
+        {
+            try
+            {
+                source = string.IsNullOrEmpty(source) ? $"{userName} - {machineName}" : source;
+
+                var payload = new
+                {
+                    message = message,
+                    priority = priority,
+                    source = source
+                };
+
+                var json = System.Text.Json.JsonSerializer.Serialize(payload);
+                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(baseUrl, content);
+
+                response.EnsureSuccessStatusCode();
+
+                var responseBody = await response.Content.ReadAsStringAsync();
+                return responseBody;
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
+            }
         }
 
         private async Task CheckForUpdateAsync()
@@ -98,16 +272,28 @@ namespace AppLauncher
                     PropertyNameCaseInsensitive = true
                 });
 
-                if (release != null && release.Tag_name != null && release.Tag_name != CurrentVersion)
+                if (release != null && !string.IsNullOrWhiteSpace(release.Tag_name))
                 {
-                    isUpdateAvailable = true;
-                    NotificationWindow notif = new NotificationWindow("Update Available", $"New version available: {release.Tag_name}\nCurrent version: {CurrentVersion}"
-                        , MessageBoxImage.Information);
-                    notif.ShowNotification();
-                    await Task.Delay(3000).ContinueWith(_ =>
+                    var githubVersionStr = release.Tag_name.TrimStart('v');
+                    var currentVersionStr = CurrentVersion.TrimStart('v');
+
+                    if (Version.TryParse(githubVersionStr, out var githubVersion) &&
+                        Version.TryParse(currentVersionStr, out var currentVersion))
                     {
-                        Application.Current.Dispatcher.Invoke(() => notif.CloseNotification());
-                    });
+                        if (githubVersion > currentVersion)
+                        {
+                            isUpdateAvailable = true;
+                            NotificationWindow notif = new NotificationWindow("Update Available",
+                                $"New version available: {release.Tag_name}\nCurrent version: {CurrentVersion}",
+                                MessageBoxImage.Information);
+
+                            notif.ShowNotification();
+                            await Task.Delay(3000).ContinueWith(_ =>
+                            {
+                                Application.Current.Dispatcher.Invoke(() => notif.CloseNotification());
+                            });
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -116,27 +302,48 @@ namespace AppLauncher
             }
         }
 
-        public class GitHubRelease
+        private async Task LoadAppsAsync(IProgress<string> progress)
         {
-            public string Tag_name { get; set; }
+            var cachedApps = DatabaseHelper.LoadAppsFromDb();
+            if (cachedApps.Any())
+            {
+                allApps.AddRange(cachedApps);
+            }
+            else
+            {
+                string startMenu = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+                string commonStart = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
+
+                await EnumerateShortcutsSafeAsync(startMenu, progress);
+                await EnumerateShortcutsSafeAsync(commonStart, progress);
+
+                var unique = allApps
+                    .GroupBy(a => a.Path, StringComparer.OrdinalIgnoreCase)
+                    .Select(g => g.First())
+                    .OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase)
+                    .ToList();
+
+                allApps.Clear();
+                allApps.AddRange(unique);
+
+                DatabaseHelper.SaveAppsToDb(allApps);
+            }
         }
 
-        private void LoadApps()
+        private async Task EnumerateShortcutsSafeAsync(string root, IProgress<string> progress)
         {
-            string startMenu = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
-            string commonStart = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
-
-            EnumerateShortcutsSafe(startMenu);
-            EnumerateShortcutsSafe(commonStart);
-
-            var unique = allApps
-                .GroupBy(a => a.Path, StringComparer.OrdinalIgnoreCase)
-                .Select(g => g.First())
-                .OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase)
-                .ToList();
-
-            allApps.Clear();
-            allApps.AddRange(unique);
+            try
+            {
+                foreach (var shortcut in Directory.GetFiles(root, "*.lnk", SearchOption.AllDirectories))
+                {
+                    progress.Report($"Loading {Path.GetFileNameWithoutExtension(shortcut)}...");
+                    await Task.Run(() => TryAddShortcut(shortcut));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in EnumerateShortcutsSafe for {root}: {ex.Message}");
+            }
         }
 
         private void EnumerateShortcutsSafe(string root)
@@ -159,15 +366,18 @@ namespace AppLauncher
             {
                 var shell = new WshShell();
                 var lnk = (IWshShortcut)shell.CreateShortcut(path);
+
                 if (!string.IsNullOrWhiteSpace(lnk.TargetPath) && System.IO.File.Exists(lnk.TargetPath))
                 {
-                    allApps.Add(new AppModel
+                    if (Path.GetExtension(lnk.TargetPath).Equals(".exe", StringComparison.OrdinalIgnoreCase))
                     {
-                        Name = System.IO.Path.GetFileNameWithoutExtension(path),
-                        Path = lnk.TargetPath
-                    });
+                        allApps.Add(new AppModel
+                        {
+                            Name = Path.GetFileNameWithoutExtension(path),
+                            Path = lnk.TargetPath
+                        });
+                    }
                 }
-
             }
             catch (Exception ex)
             {
@@ -465,10 +675,11 @@ namespace AppLauncher
                 using Icon icon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
                 if (icon == null) return null;
 
+                // آیکون رو بزرگ‌تر بگیر تا کیفیت بالاتر بشه (مثلاً 128x128)
                 var src = Imaging.CreateBitmapSourceFromHIcon(
                     icon.Handle,
                     Int32Rect.Empty,
-                    BitmapSizeOptions.FromWidthAndHeight(48, 48));
+                    BitmapSizeOptions.FromWidthAndHeight(128, 128));
 
                 src.Freeze();
                 return src;
@@ -518,6 +729,7 @@ namespace AppLauncher
                 e.Handled = true;
             }
         }
+
         private void ApplyTheme()
         {
             SearchBox.Effect = new System.Windows.Media.Effects.DropShadowEffect { Color = Colors.White, BlurRadius = 5, ShadowDepth = 0 };
@@ -536,18 +748,13 @@ namespace AppLauncher
 
         private void BtnAboutUs_Click(object sender, RoutedEventArgs e)
         {
-            AboutUsWindow aboutUsWindow = new AboutUsWindow() { Owner =  this};
+            AboutUsWindow aboutUsWindow = new AboutUsWindow();
             aboutUsWindow.tbStatusUpdate.Visibility = isUpdateAvailable ? Visibility.Visible : Visibility.Hidden;
+            aboutUsWindow.UpdateNotifEllips.Visibility = isUpdateAvailable ? Visibility.Visible : Visibility.Hidden;
             aboutUsWindow.Show();
-            Show();
+            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
         }
-    }
-
-    public class AppModel
-    {
-        public string Name { get; set; }
-        public string Path { get; set; }
-        public ImageSource Icon { get; set; }
+        #endregion
     }
 
 }

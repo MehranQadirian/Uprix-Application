@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,22 +16,27 @@ using System.Windows.Shapes;
 
 namespace AppLauncher
 {
-    /// <summary>
-    /// Interaction logic for AboutUsWindow.xaml
-    /// </summary>
     public partial class AboutUsWindow : Window
     {
+        #region Variables
+        private MainWindow main = new MainWindow();
+        private string userName = Environment.UserName;
+        #endregion
+        #region Methods
         public AboutUsWindow()
         {
             InitializeComponent();
         }
-        private void btnCheckUpdate_Click(object sender, RoutedEventArgs e)
+
+        private async void btnCheckUpdate_Click(object sender, RoutedEventArgs e)
         {
+            bool isConnection = await IsInternetAvailable();
             var win = new UpdateWindow { Owner = this };
-            win.ShowDialog();
+            if (isConnection)
+                win.ShowDialog();
         }
 
-        private void btnTelegram_Click(object sender, RoutedEventArgs e)
+        private async void btnTelegram_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -39,6 +45,7 @@ namespace AppLauncher
                     FileName = "https://t.me/UprixApplication",
                     UseShellExecute = true
                 });
+                await main.SendMessageAsync($"{userName} Opened Uprix Telegram Channel", "", "normal");
             }
             catch (Exception ex)
             {
@@ -46,7 +53,24 @@ namespace AppLauncher
             }
         }
 
-        private void btnGithub_Click(object sender, RoutedEventArgs e)
+        public static async Task<bool> IsInternetAvailable()
+        {
+            try
+            {
+                using var client = new HttpClient
+                {
+                    Timeout = TimeSpan.FromSeconds(5)
+                };
+                var response = await client.GetAsync("https://www.google.com");
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private async void btnGithub_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -55,6 +79,7 @@ namespace AppLauncher
                     FileName = "https://github.com/MehranQadirian/Uprix-Application",
                     UseShellExecute = true
                 });
+                await main.SendMessageAsync($"{userName} Opened Uprix Launcher Github", "", "high");
             }
             catch (Exception ex)
             {
@@ -62,41 +87,13 @@ namespace AppLauncher
             }
         }
 
-        private void btnTelephone_Click(object sender, RoutedEventArgs e)
+        private async void btnTelephone_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                string machineName = Environment.MachineName;
-                string userName = Environment.UserName;
-                string osVersion = Environment.OSVersion.ToString();
-                string dotnetVersion = Environment.Version.ToString();
-
-                string subject = Uri.EscapeDataString("Uprix Application - Support Request");
-                string body = Uri.EscapeDataString(
-                    $"Hello Uprix Team" +
-                    $"\nI need support regarding the Uprix Application" +
-                    $"\nMachine Name: {machineName}" +
-                    $"\nUser Name: {userName}" +
-                    $"\nOS Version: {osVersion}" +
-                    $"\n.NET Version: {dotnetVersion}" +
-                    $"\n\n\n[Please describe your issue here... <Persian or English> ]:\n\n\t"
-                );
-
-                string gmailUrl = $"https://mail.google.com/mail/?view=cm&fs=1" +
-                                  $"&to=mehranghadirian01@gmail.com" +
-                                  $"&su={subject}" +
-                                  $"&body={body}";
-
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = gmailUrl,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to open Gmail:\n" + ex.Message);
-            }
+            GmailWindow gmail = new GmailWindow();
+            Hide();
+            gmail.ShowDialog();
+            Show();
         }
+        #endregion
     }
 }

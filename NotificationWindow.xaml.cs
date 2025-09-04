@@ -20,7 +20,7 @@ namespace AppLauncher
     public partial class NotificationWindow : Window
     {
         public bool IsNotificationVisible { get; private set; } = false;
-
+        #region Methods
         public NotificationWindow(string caption, string text, MessageBoxImage type)
         {
             InitializeComponent();
@@ -87,5 +87,6 @@ namespace AppLauncher
             this.BeginAnimation(Window.OpacityProperty, fade);
 
         }
+        #endregion
     }
 }
