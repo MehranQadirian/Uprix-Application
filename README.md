@@ -51,7 +51,7 @@ This application provides a **faster, cleaner, and customizable way** to access 
 ---
 
 ## ⚙️ Installation
-1. Download the latest installer from [Releases](https://github.com/MehranQadirian/Uprix-Application/releases).  
+1. Download the latest installer [[DOWNLOAD]](https://github.com/MehranQadirian/Uprix-Application/releases/download/v2.3.0.1/AppLauncher-Setup.exe).  
 2. Run the setup file and follow the instructions.  
 3. Enjoy faster app launching 🚀  
 
@@ -60,5 +60,5 @@ This application provides a **faster, cleaner, and customizable way** to access 
 ## 🧑‍💻 Developer
 Developed by **Mehran Qadirian**  
 - 🌐 [GitHub Repository](https://github.com/MehranQadirian/Uprix-Application)  
-- 📬 mehranghadirian01@gmail.com  
+- 📬 [Chat & Feedback](https://t.me/UprixChatBot) 
 - 📢 [Telegram Channel](https://t.me/UprixApplication)  
