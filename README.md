@@ -2,7 +2,7 @@
 [🇬🇧 English](#-english-description) | [🇮🇷 فارسی](#-توضیحات-فارسی)
 🚀 A modern and elegant application launcher built with **WPF (.NET)**.  
 This software helps you organize, search, and run your installed programs quickly with a clean and animated UI.  
-
+### Version 2.3.0.1
 ---
 
 ## 🌍 English Description
@@ -44,7 +44,8 @@ This application provides a **faster, cleaner, and customizable way** to access 
 ---
 
 ## 📷 Screenshot
-<img width="1183" height="793" alt="image" src="https://github.com/user-attachments/assets/24f8c4f6-4731-4265-972d-4bbad10b0866" />
+<img width="1170" height="677" alt="image" src="https://github.com/user-attachments/assets/63316333-aa34-4221-8c48-c0b1c8e32b97" />
+
 
 
 ---
