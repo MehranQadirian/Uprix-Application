@@ -159,7 +159,7 @@ namespace AppLauncher
         {
             using (var client = new HttpClient())
             {
-                string apiKey = "b57b55270b3b496aab2060296216c131"; // کلید سرویس
+                string apiKey = "<YOUR-API-KEY>"; 
                 string url = $"https://emailvalidation.abstractapi.com/v1/?api_key={apiKey}&email={email}";
                 var response = await client.GetAsync(url);
 
