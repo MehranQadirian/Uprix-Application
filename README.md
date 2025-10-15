@@ -15,7 +15,7 @@
 
 <img src="docs/images/banner.png" alt="Uprix Banner" width="800"/>
 
-[دانلود نسخه آخر](https://github.com/MehranQadirian/Uprix-Application/releases/latest) • [مستندات](docs/README-FA.md) • [گزارش مشکل](https://github.com/MehranQadirian/Uprix-Application/issues)
+[دانلود نسخه آخر](https://github.com/MehranQadirian/Uprix-Application/releases/latest) • [مستندات](docs/README.md) • [گزارش مشکل](https://github.com/MehranQadirian/Uprix-Application/issues)
 
 </div>
 
