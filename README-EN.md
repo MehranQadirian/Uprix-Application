@@ -13,7 +13,7 @@
 
 <img src="docs/images/banner.png" alt="Uprix Banner" width="800"/>
 
-[Download Latest Release](https://github.com/MehranQadirian/Uprix-Application/releases/latest) • [Documentation](docs/README-EN.md) • [Report Issue](https://github.com/MehranQadirian/Uprix-Application/issues)
+[Download Latest Release](https://github.com/MehranQadirian/Uprix-Application/releases/latest) • [Documentation](./README-EN.md) • [Report Issue](https://github.com/MehranQadirian/Uprix-Application/issues)
 
 </div>
 
