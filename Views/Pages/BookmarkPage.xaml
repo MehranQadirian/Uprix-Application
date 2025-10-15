@@ -1,0 +1,291 @@
+﻿<Page x:Class="AppLauncher.Views.Pages.BookmarkPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:local="clr-namespace:AppLauncher.Views.Pages" mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="1000" Title="BookmarkPage" Background="#F5F5F5" FontFamily="Nunito">
+    <Page.Resources><!-- Define the star geometry for favorite icon -->
+        <PathGeometry x:Key="StarGeometry" Figures="M64.39,2,80.11,38.76,120,42.33a3.2,3.2,0,0,1,1.83,5.59h0L91.64,74.25l8.92,39a3.2,3.2,0,0,1-4.87,3.4L61.44,96.19,27.09,116.73a3.2,3.2,0,0,1-4.76-3.46h0l8.92-39L1.09,47.92A3.2,3.2,0,0,1,3,42.32l39.74-3.56L58.49,2a3.2,3.2,0,0,1,5.9,0Z"/><!-- Tab Colors -->
+        <SolidColorBrush x:Key="TabItemNormalBackground" Color="White"/>
+        <SolidColorBrush x:Key="TabItemHoverBackground" Color="#E3F2FD"/>
+        <SolidColorBrush x:Key="TabItemSelectedBackground" Color="#2196F3"/>
+        <SolidColorBrush x:Key="TabItemSelectedHoverBackground" Color="#1976D2"/><!-- Star/Favorite Colors -->
+        <SolidColorBrush x:Key="StarStrokeColor" Color="Gray"/>
+        <SolidColorBrush x:Key="StarFillHoverColor" Color="Gold"/>
+        <SolidColorBrush x:Key="StarFavoritedColor" Color="Gold"/>
+        <SolidColorBrush x:Key="StarFavoritedHoverColor" Color="Red"/><!-- Bookmark Item Colors -->
+        <SolidColorBrush x:Key="BookmarkBackground" Color="White"/>
+        <SolidColorBrush x:Key="BookmarkHoverBackground" Color="#F9F9F9"/>
+        <SolidColorBrush x:Key="BookmarkBorderColor" Color="#E0E0E0"/>
+        <SolidColorBrush x:Key="BookmarkHoverBorderColor" Color="#2196F3"/><!-- Rate Indicator Colors -->
+        <SolidColorBrush x:Key="RateNormalColor" Color="#4CAF50"/>
+        <SolidColorBrush x:Key="RateWarningColor" Color="#FF9800"/>
+        <SolidColorBrush x:Key="RateCriticalColor" Color="#F44336"/>
+        <SolidColorBrush x:Key="RateEmergencyColor" Color="#B71C1C"/><!-- Text Colors -->
+        <SolidColorBrush x:Key="BookmarkTitleColor" Color="#1E1E3C"/>
+        <SolidColorBrush x:Key="BookmarkUrlColor" Color="#1E1E28"/>
+        <SolidColorBrush x:Key="BookmarkUsageColor" Color="#484848"/><!-- Button Colors -->
+        <SolidColorBrush x:Key="EditButtonBackground" Color="#2196F3"/>
+        <SolidColorBrush x:Key="EditButtonHoverBackground" Color="#1976D2"/>
+        <SolidColorBrush x:Key="DeleteButtonBackground" Color="#F44336"/>
+        <SolidColorBrush x:Key="DeleteButtonHoverBackground" Color="#D32F2F"/>
+        <SolidColorBrush x:Key="ButtonForeground" Color="White"/><!-- Style for the favorite star button when not favorited -->
+        <Style x:Key="FavoriteButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Path Data="{StaticResource StarGeometry}" Stretch="Uniform" x:Name="StarPath" Stroke="{DynamicResource StarStrokeColor}" StrokeThickness="1.5" Fill="Transparent"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="StarPath" Property="Fill" Value="{DynamicResource StarFillHoverColor}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style><!-- Style for the favorite star button when favorited -->
+        <Style x:Key="FavoritedButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Path Data="{StaticResource StarGeometry}" Stretch="Uniform" x:Name="StarPath" Fill="{DynamicResource StarFavoritedColor}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="StarPath" Property="Fill" Value="{DynamicResource StarFavoritedHoverColor}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style><!-- Style for bookmark items with responsive design -->
+        <Style x:Key="BookmarkItemStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BookmarkBackground}"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BookmarkBorderColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource BookmarkHoverBackground}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource BookmarkHoverBorderColor}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style><!-- Data template for bookmark items -->
+        <DataTemplate x:Key="BookmarkItemTemplate">
+            <Border Style="{StaticResource BookmarkItemStyle}" AllowDrop="True" PreviewMouseLeftButtonDown="Bookmark_PreviewMouseLeftButtonDown" Drop="Bookmark_Drop" DragOver="Bookmark_DragOver">
+                <Border.InputBindings>
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding DataContext.OpenBookmarkCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
+                </Border.InputBindings>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions><!-- Rate indicator ellipse with color coding -->
+                    <Ellipse Grid.Column="0" Width="12" Height="12" Margin="0,0,10,0" VerticalAlignment="Center">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Rate}" Value="Normal">
+                                        <Setter Property="Fill" Value="{DynamicResource RateNormalColor}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Rate}" Value="Warning">
+                                        <Setter Property="Fill" Value="{DynamicResource RateWarningColor}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Rate}" Value="Critical">
+                                        <Setter Property="Fill" Value="{DynamicResource RateCriticalColor}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Rate}" Value="Emergency">
+                                        <Setter Property="Fill" Value="{DynamicResource RateEmergencyColor}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse><!-- Bookmark text and URL -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Text}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource BookmarkTitleColor}" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding URL}" FontSize="11" Foreground="{DynamicResource BookmarkUrlColor}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                        <TextBlock FontSize="10" Foreground="{DynamicResource BookmarkUsageColor}" Margin="0,2,0,0">
+                            <Run Text="Used: "/>
+                            <Run Text="{Binding RecentlyUsed}"/>
+                            <Run Text=" times"/>
+                        </TextBlock>
+                    </StackPanel><!-- Favorite star button with dynamic style -->
+                    <Button Grid.Column="2" Margin="10,0,0,0" VerticalAlignment="Center" Click="FavoriteButton_Click" Tag="{Binding}">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Width" Value="24"/>
+                                <Setter Property="Height" Value="24"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Grid Background="{TemplateBinding Background}">
+                                                <Path Data="{StaticResource StarGeometry}" Stretch="Uniform" x:Name="StarPath" Stroke="{DynamicResource StarStrokeColor}" StrokeThickness="1.5" Fill="Transparent"/>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="StarPath" Property="Fill" Value="{DynamicResource StarFillHoverColor}"/>
+                                                    <Setter TargetName="StarPath" Property="Stroke" Value="{DynamicResource StarFillHoverColor}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Favorite}" Value="True">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Grid Background="{TemplateBinding Background}">
+                                                        <Path Data="{StaticResource StarGeometry}" Stretch="Uniform" x:Name="StarPath" Fill="{DynamicResource StarFavoritedColor}" Stroke="{DynamicResource StarFavoritedColor}" StrokeThickness="1.5"/>
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="StarPath" Property="Fill" Value="{DynamicResource StarFavoritedHoverColor}"/>
+                                                            <Setter TargetName="StarPath" Property="Stroke" Value="{DynamicResource StarFavoritedHoverColor}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button><!-- Action buttons (Edit and Delete) -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
+                        <Button Content="Edit" Padding="8,4" Margin="5,0" Background="{DynamicResource EditButtonBackground}" Foreground="{DynamicResource ButtonForeground}" BorderThickness="0" Cursor="Hand" Click="EditButton_Click" Tag="{Binding}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="3" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource EditButtonHoverBackground}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Content="Delete" Padding="8,4" Background="{DynamicResource DeleteButtonBackground}" Foreground="{DynamicResource ButtonForeground}" BorderThickness="0" Cursor="Hand" Click="DeleteButton_Click" Tag="{Binding}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="3" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource DeleteButtonHoverBackground}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+    <Border Background="Transparent" CornerRadius="10">
+        <Grid Background="Transparent">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/><!-- Header -->
+                <RowDefinition Height="*"/><!-- Content (TabControl) -->
+            </Grid.RowDefinitions><!-- Header section with title and add button -->
+            <Border Grid.Row="0" x:Name="brHeader" Background="White" BorderBrush="#E0E0E0" CornerRadius="5" Margin="5" BorderThickness="0,0,0,1" Padding="20,15">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Bookmark Manager" x:Name="txtTitle" FontSize="24" FontWeight="Bold" Foreground="#212121"/>
+                        <TextBlock Text="Manage bookmarks across all browsers" x:Name="txtSubTitle" FontSize="12" Foreground="Gray" Margin="0,5,0,0"/>
+                    </StackPanel><!-- Add new bookmark button -->
+                    <Button Grid.Column="1" Content="+ Add Bookmark" Padding="15,8" Background="#4CAF50" Foreground="White" BorderThickness="0" Cursor="Hand" x:Name="AddBookmarkBtn" FontWeight="SemiBold" Click="AddBookmarkButton_Click">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#388E3C"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+            </Border><!-- TabControl for different browsers with responsive design -->
+            <TabControl Grid.Row="1" x:Name="BrowserTabControl" Margin="10" Background="Transparent" BorderThickness="0">
+                <TabControl.Resources><!-- Style for tab items -->
+                    <Style TargetType="TabItem">
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Border Name="tbitemBorder" Background="{DynamicResource TabItemNormalBackground}" CornerRadius="10" Margin="2,0" Padding="15,10">
+                                        <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="tbitemBorder" Property="Background" Value="{DynamicResource TabItemSelectedBackground}"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="tbitemBorder" Property="Background" Value="{DynamicResource TabItemHoverBackground}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TabItemSelectedBackground}"/>
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsSelected" Value="True"/>
+                                                <Condition Property="IsMouseOver" Value="True"/>
+                                            </MultiTrigger.Conditions>
+                                            <Setter TargetName="tbitemBorder" Property="Background" Value="{DynamicResource TabItemSelectedHoverBackground}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TabItemSelectedBackground}"/>
+                                        </MultiTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.Resources><!-- Tab items will be dynamically generated in code-behind --><!-- Each tab will contain a ScrollViewer with ItemsControl for bookmarks -->
+            </TabControl>
+        </Grid>
+    </Border>
+</Page>

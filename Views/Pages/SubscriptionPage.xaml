@@ -1,0 +1,5 @@
+﻿<Page x:Class="AppLauncher.Views.Pages.SubscriptionPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Subscription">
+  <Grid>
+    <TextBlock x:Name="SoonText" Text="Soon" FontFamily="Nunito" FontSize="72" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+  </Grid>
+</Page>

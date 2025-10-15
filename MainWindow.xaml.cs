@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,383 +11,321 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Interop;
 using System.Drawing;
-using IWshRuntimeLibrary;
+using System.Windows.Threading;
+using System.ComponentModel;
+using AppLauncher.Views.Pages;
+using System.Windows.Navigation;
+using AppLauncher.Classes;
+using AppLauncher.Classes.MainClasses;
+using AppLauncher.Views.Controls;
+
 using Brushes = System.Windows.Media.Brushes;
 using Image = System.Windows.Controls.Image;
 using Color = System.Windows.Media.Color;
-using System.Text.Json;
-using System.Net.Http;
-using System.Windows.Threading;
-using System.ComponentModel;
-using System.Data.SQLite;
+using ColorConverter = System.Windows.Media.ColorConverter;
+using AppLauncher.Classes.Core_Classes;
+using System.Windows.Media.Effects;
 
 namespace AppLauncher
 {
-    public class GitHubRelease
+    public class ThemeColorsMainWindow
     {
-        public string Tag_name { get; set; }
-    }
-
-    public static class DatabaseHelper
-    {
-        private static readonly string DbPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "AppLauncher", "apps.db");
-
-        private static readonly string ConnectionString = $"Data Source={DbPath};Version=3;";
-
-        static DatabaseHelper()
-        {
-            InitializeDatabase();
-        }
-
-        private static void InitializeDatabase()
-        {
-            try
-            {
-                var dir = Path.GetDirectoryName(DbPath);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-
-                if (!System.IO.File.Exists(DbPath))
-                    SQLiteConnection.CreateFile(DbPath);
-
-                using var conn = new SQLiteConnection(ConnectionString);
-                conn.Open();
-
-                string createTable = @"
-                    CREATE TABLE IF NOT EXISTS Apps (
-                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        Name TEXT NOT NULL,
-                        Path TEXT NOT NULL UNIQUE
-                    );";
-
-                using var cmd = new SQLiteCommand(createTable, conn);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error initializing database: " + ex.Message);
-            }
-        }
-
-        public static List<AppModel> LoadAppsFromDb()
-        {
-            var apps = new List<AppModel>();
-            try
-            {
-                using var conn = new SQLiteConnection(ConnectionString);
-                conn.Open();
-
-                string sql = "SELECT Name, Path FROM Apps ORDER BY Name COLLATE NOCASE;";
-                using var cmd = new SQLiteCommand(sql, conn);
-                using var reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    apps.Add(new AppModel
-                    {
-                        Name = reader.GetString(0),
-                        Path = reader.GetString(1)
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error loading apps from DB: " + ex.Message);
-            }
-            return apps;
-        }
-
-        public static void SaveAppsToDb(List<AppModel> apps)
-        {
-            try
-            {
-                using var conn = new SQLiteConnection(ConnectionString);
-                conn.Open();
-
-                using var tran = conn.BeginTransaction();
-                string insertSql = "INSERT OR IGNORE INTO Apps (Name, Path) VALUES (@Name, @Path);";
-
-                using var cmd = new SQLiteCommand(insertSql, conn);
-                cmd.Parameters.Add(new SQLiteParameter("@Name"));
-                cmd.Parameters.Add(new SQLiteParameter("@Path"));
-
-                foreach (var app in apps)
-                {
-                    cmd.Parameters["@Name"].Value = app.Name;
-                    cmd.Parameters["@Path"].Value = app.Path;
-                    cmd.ExecuteNonQuery();
-                }
-
-                tran.Commit();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error saving apps to DB: " + ex.Message);
-            }
-        }
-
-        public static void ClearAppsDb()
-        {
-            try
-            {
-                using var conn = new SQLiteConnection(ConnectionString);
-                conn.Open();
-                using var cmd = new SQLiteCommand("DELETE FROM Apps;", conn);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error clearing DB: " + ex.Message);
-            }
-        }
-    }
-
-    public class AppModel
-    {
-        public string Name { get; set; }
-        public string Path { get; set; }
-        public ImageSource Icon { get; set; }
-        public bool IsFavorite { get; set; }   // ⭐️ جدید
+        public string CaretBrushTextBoxes { get; set; }
     }
 
     public partial class MainWindow : Window
     {
         #region Variables
-        public string CurrentVersion = "v2.3.0.1";
-        private const double TILE_W = 160;
-        private const double TILE_H = 160;
-        private const double TILE_MARGIN = 10;
+        private bool isMenuExpanded = false;
+        public string CurrentVersion = "v3.0.0.0";
+        private Button currentActiveButton = null;
+        public const double TILE_W = 160;
+        public const double TILE_H = 160;
+        public const double TILE_MARGIN = 10;
         private bool recalcScheduled = false;
-        private static readonly HttpClient client = new HttpClient();
-        private readonly string baseUrl = "https://restless-lab-609b.nexlifytodo.workers.dev/";
+
         private readonly List<AppModel> allApps = new List<AppModel>();
         private List<AppModel> filteredApps = new List<AppModel>();
-        private readonly Dictionary<string, ImageSource> iconCache = new Dictionary<string, ImageSource>();
+        public readonly Dictionary<string, ImageSource> iconCache = new Dictionary<string, ImageSource>();
+        private DispatcherTimer _clockTimer;
         TextBlock appsName;
+        TextBlock ratetxt;
+        Image appimg;
+        Border activeIndicator;
         private int currentPage = 0;
         private int itemsPerPage = 12;
-        private bool isUpdateAvailable = false;
+        public bool isUpdateAvailable = false;
         private readonly Random rand = new Random();
         private Button selectedButton;
-        private readonly string machineName = Environment.MachineName;
-        private readonly string userName = Environment.UserName;
+
+        private bool isFavorite = false;
+        private ApplyThemes apply = new ApplyThemes();
+        private SolidColorBrush forePrim;
+        private SolidColorBrush foreSec;
+        private SearchEngine searchEngine = new SearchEngine();
+        private UpdaterService updaterService;
+
+        // New: Track last visited page
+        private string lastViewPage = "Launcher";
         #endregion
-        #region Methods
+
         public MainWindow()
         {
             InitializeComponent();
-            
+
+            updaterService = new UpdaterService(CurrentVersion, this);
+
+            HamburgerButton.Click += HamburgerButton_Click;
+            ViewButton.Click += ViewButton_Click;
+            ExploreButton.Click += ExploreButton_Click;
+            SubscriptionButton.Click += SubscriptionButton_Click;
+            SettingsButton.Click += SettingsButton_Click;
+            AboutUsButton.Click += AboutUsButton_Click;
+
+            Loaded += MainWindow_Loaded;
             SearchBox.Focus();
             this.StateChanged += Window_StateChanged;
             this.Closing += Window_Closing;
+            this.PreviewMouseDown += Window_PreviewMouseDown;
+
+            _resizeTimer = new DispatcherTimer();
+            _resizeTimer.Interval = TimeSpan.FromMilliseconds(200);
+            _resizeTimer.Tick += ResizeTimer_Tick;
+
+            // Load last visited page from settings
+            lastViewPage = Properties.Settings.Default.LastViewPage ?? "Launcher";
         }
-        
-        private void Window_Closing(object sender, CancelEventArgs e)
+
+        private void ResizeTimer_Tick(object sender, EventArgs e)
         {
-            Application.Current.Shutdown();
+            _resizeTimer.Stop();
+            Properties.Settings.Default.lastWidth = Width;
+            Properties.Settings.Default.lastHeight = Height;
+            Properties.Settings.Default.Save();
+            if (LauncherBaseGrid.IsEnabled && LauncherBaseGrid.Visibility == Visibility.Visible)
+            {
+                RefreshAppGrid();
+            }
+        }
+
+        private SolidColorBrush ToBrush(string color) => new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
+
+        private void SetFillAndStroke(System.Windows.Shapes.Shape shape, string color)
+        {
+            var brush = ToBrush(color);
+            shape.Fill = brush;
+            shape.Stroke = brush;
+        }
+
+        private void ApplyCustomTheme(ThemeColorsMainWindow theme)
+        {
+            SetBrushColor("CaretBrushTextBoxes", theme.CaretBrushTextBoxes);
+        }
+
+        private void SetBrushColor(string resourceKey, string colorHex)
+        {
+            try
+            {
+                Color color = (Color)ColorConverter.ConvertFromString(colorHex);
+
+                if (this.Resources.Contains(resourceKey))
+                {
+                    var obj = this.Resources[resourceKey];
+                    if (obj is SolidColorBrush scb && !scb.IsFrozen)
+                    {
+                        scb.Color = color;
+                    }
+                    else
+                    {
+                        this.Resources[resourceKey] = new SolidColorBrush(color);
+                    }
+                }
+                else
+                {
+                    this.Resources.Add(resourceKey, new SolidColorBrush(color));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error setting color for {resourceKey}: {ex.Message}");
+            }
+        }
+
+        public void SetTheme()
+        {
+            Console.WriteLine(DateTime.Now.Date);
+            apply.ApplyThm();
+
+            // MenuIconColor
+            SetFillAndStroke(viewSVG, apply.MenuIconColor);
+            SetFillAndStroke(exploreSVG, apply.MenuIconColor);
+            SetFillAndStroke(subscriptionSVG, apply.MenuIconColor);
+            SetFillAndStroke(aboutSVG, apply.MenuIconColor);
+            SetFillAndStroke(hapburSVG, apply.MenuIconColor);
+            SetFillAndStroke(settingsSVG, apply.MenuIconColor);
+
+            copyrightSVG.Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+            ClearSearchBoxBtnIcon.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+            SearchIcon.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+            Application.Current.Resources["ActiveIndicatorBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+
+            Application.Current.Resources["AnimationNavButtonForeground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+            NavigationPanel.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+            Copyright.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+            SearchBox.Foreground = Copyright.Foreground;
+            AboutUsText.Foreground = Copyright.Foreground;
+            SettingsText.Foreground = Copyright.Foreground;
+            ViewText.Foreground = Copyright.Foreground;
+            ExploreText.Foreground = Copyright.Foreground;
+            SubscriptionText.Foreground = Copyright.Foreground;
+            SearchPlaceHolder.Foreground = Copyright.Foreground;
+            AppName.Foreground = Copyright.Foreground;
+            foreSec = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+
+            // BackgroundPrimary
+            Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundPrimary));
+            brLauncher.Background = Background;
+            ParticleCanvas.Background = Background;
+            brPageNum.Background = Background;
+            var app = Application.Current;
+            app.Resources["ComboBoxBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundPrimary));
+            app.Resources["ComboBoxBorder"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundLightPart));
+            app.Resources["ComboBoxText"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.ForegroundPrimary));
+            app.Resources["ComboBoxHoverBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundSelectedTile));
+            app.Resources["ComboBoxFocusBorder"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.ForegroundPrimary));
+            app.Resources["ComboBoxDisabledBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundSecundary));
+            app.Resources["ComboBoxDisabledText"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.ForegroundStatus));
+            app.Resources["ComboBoxArrow"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.ForegroundSecundary));
+            app.Resources["ComboBoxDropdownBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundPrimary));
+            app.Resources["ComboBoxItemHoverBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundLightPart));
+            app.Resources["ComboBoxItemSelectedBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundSelectedTile));
+            app.Resources["CaretBrushTextBoxes"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.ForegroundPrimary));
+
+            // BackgroundSecundary
+            NavigationPanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundSecundary));
+            brHamburgerBtn.Background = NavigationPanel.Background;
+            brSearchBox.Background = NavigationPanel.Background;
+            prvPath.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+            nxtPath.Fill = prvPath.Fill;
+
+            // BackgroundSelectedTile
+            Application.Current.Resources["SelectedTileApps"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundSelectedTile));
+            brSearchBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.ForegroundOnSecundary));
+            SearchBox.CaretBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+
+            RefreshAppGrid();
         }
 
         private void Window_StateChanged(object sender, EventArgs e)
         {
-            Dispatcher.BeginInvoke(new Action(() =>
+            if (WindowState == WindowState.Maximized)
             {
-                RecalculatePagination();
-                ClampPage();
-                RenderCurrentPage();
-            }), System.Windows.Threading.DispatcherPriority.Loaded);
-
+                Properties.Settings.Default.isMaximaied = true;
+                Properties.Settings.Default.Save();
+            }
+            else
+            {
+                Properties.Settings.Default.isMaximaied = false;
+                Properties.Settings.Default.Save();
+            }
+            _ = Dispatcher.BeginInvoke(new Action(() =>
+            {
+                RefreshAppGrid();
+            }), DispatcherPriority.Loaded);
         }
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        public void RestartApp()
         {
-            ApplyTheme();
+            Process currentProcess = Process.GetCurrentProcess();
+            _ = Process.Start(currentProcess.MainModule.FileName);
+            Application.Current.Shutdown();
+        }
 
-            var progressWindow = new ProgressWindow();
-            progressWindow.Show();
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            SetTheme();
+            ApplyCustomTheme(new ThemeColorsMainWindow
+            {
+                CaretBrushTextBoxes = apply.MenuIconColor
+            });
+            Width = Properties.Settings.Default.lastWidth;
+            Height = Properties.Settings.Default.lastHeight;
+            WindowState = Properties.Settings.Default.isMaximaied ? WindowState.Maximized : WindowState.Normal;
 
-            var progress = new Progress<string>(status => progressWindow.UpdateStatus(status));
-            await LoadAppsAsync(progress);
+            var lazyLoadingOverlay = new LazyLoadingOverlay(
+                apply,
+                backgroundColor: apply.BackgroundPrimary,
+                skeletonColor: apply.BackgroundSecundary,
+                shimmerColor: apply.BackgroundSelectedTile
+            )
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch
+            };
 
-            progressWindow.Close();
+            Grid mainGrid = (Grid)Content;
+            Grid.SetRowSpan(lazyLoadingOverlay, 10);
+            Grid.SetColumnSpan(lazyLoadingOverlay, 10);
+            Panel.SetZIndex(lazyLoadingOverlay, 9999);
+            mainGrid.Children.Add(lazyLoadingOverlay);
+
+            lazyLoadingOverlay.Opacity = 0;
+            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.3));
+            lazyLoadingOverlay.BeginAnimation(OpacityProperty, fadeIn);
+
+            var progress = new Progress<string>(status =>
+            {
+                lazyLoadingOverlay.UpdateStatus(status);
+            });
+
+            AppLoader appLoader = new AppLoader(allApps);
+            await appLoader.LoadAsync(progress);
+
+            await Task.Delay(300);
+
+            await lazyLoadingOverlay.HideWithAnimation();
+            mainGrid.Children.Remove(lazyLoadingOverlay);
 
             ApplyFilterAndReset();
             RecalculatePagination();
             RenderCurrentPage();
-            await SendMessageAsync($"{userName} Running and using {CurrentVersion}", "", "low");
-            await CheckForUpdateAsync();
+
+            // Navigate to last visited page
+            ViewButton_Click(null, null);
+
+            await updaterService.CheckForUpdateAsync();
         }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            // Save last visited page
+            Properties.Settings.Default.LastViewPage = lastViewPage;
+            Properties.Settings.Default.Save();
+
+            DatabaseManager.CloseAll();
+            Application.Current.Shutdown();
+        }
+
+        private DispatcherTimer _resizeTimer;
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            RecalculatePagination();
-            ClampPage();
-            RenderCurrentPage();
-        }
-
-        public async Task<string> SendMessageAsync(string message, string source = "", string priority = "normal")
-        {
-            try
-            {
-                source = string.IsNullOrEmpty(source) ? $"{userName} - {machineName}" : source;
-
-                var payload = new
-                {
-                    message = message,
-                    priority = priority,
-                    source = source
-                };
-
-                var json = System.Text.Json.JsonSerializer.Serialize(payload);
-                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
-                var response = await client.PostAsync(baseUrl, content);
-
-                response.EnsureSuccessStatusCode();
-
-                var responseBody = await response.Content.ReadAsStringAsync();
-                return responseBody;
-            }
-            catch (Exception ex)
-            {
-                return $"Error: {ex.Message}";
-            }
-        }
-
-        private async Task CheckForUpdateAsync()
-        {
-            try
-            {
-                using var client = new HttpClient();
-                client.DefaultRequestHeaders.UserAgent.ParseAdd("AppLauncher-VersionCheck");
-                var url = "https://api.github.com/repos/MehranQadirian/Uprix-Application/releases/latest";
-                var res = await client.GetAsync(url);
-                res.EnsureSuccessStatusCode();
-
-                using var stream = await res.Content.ReadAsStreamAsync();
-                var release = await JsonSerializer.DeserializeAsync<GitHubRelease>(stream, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (release != null && !string.IsNullOrWhiteSpace(release.Tag_name))
-                {
-                    var githubVersionStr = release.Tag_name.TrimStart('v');
-                    var currentVersionStr = CurrentVersion.TrimStart('v');
-
-                    if (Version.TryParse(githubVersionStr, out var githubVersion) &&
-                        Version.TryParse(currentVersionStr, out var currentVersion))
-                    {
-                        if (githubVersion > currentVersion)
-                        {
-                            isUpdateAvailable = true;
-                            NotificationWindow notif = new NotificationWindow("Update Available",
-                                $"New version available: {release.Tag_name}\nCurrent version: {CurrentVersion}",
-                                MessageBoxImage.Information);
-
-                            notif.ShowNotification();
-                            await Task.Delay(3000).ContinueWith(_ =>
-                            {
-                                Application.Current.Dispatcher.Invoke(() => notif.CloseNotification());
-                            });
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in CheckForUpdateAsync: {ex.Message}");
-            }
-        }
-
-        private async Task LoadAppsAsync(IProgress<string> progress)
-        {
-            var cachedApps = DatabaseHelper.LoadAppsFromDb();
-            if (cachedApps.Any())
-            {
-                allApps.AddRange(cachedApps);
-            }
-            else
-            {
-                string startMenu = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
-                string commonStart = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
-
-                await EnumerateShortcutsSafeAsync(startMenu, progress);
-                await EnumerateShortcutsSafeAsync(commonStart, progress);
-
-                var unique = allApps
-                    .GroupBy(a => a.Path, StringComparer.OrdinalIgnoreCase)
-                    .Select(g => g.First())
-                    .OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase)
-                    .ToList();
-
-                allApps.Clear();
-                allApps.AddRange(unique);
-
-                DatabaseHelper.SaveAppsToDb(allApps);
-            }
-        }
-
-        private async Task EnumerateShortcutsSafeAsync(string root, IProgress<string> progress)
-        {
-            try
-            {
-                foreach (var shortcut in Directory.GetFiles(root, "*.lnk", SearchOption.AllDirectories))
-                {
-                    progress.Report($"Loading {Path.GetFileNameWithoutExtension(shortcut)}...");
-                    await Task.Run(() => TryAddShortcut(shortcut));
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in EnumerateShortcutsSafe for {root}: {ex.Message}");
-            }
-        }
-
-        private void EnumerateShortcutsSafe(string root)
-        {
-            try
-            {
-                foreach (var shortcut in Directory.GetFiles(root, "*.lnk", SearchOption.AllDirectories))
-                    TryAddShortcut(shortcut);
-                
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in EnumerateShortcutsSafe for {root}: {ex.Message}");
-            }
-        }
-
-        private void TryAddShortcut(string path)
-        {
-            try
-            {
-                var shell = new WshShell();
-                var lnk = (IWshShortcut)shell.CreateShortcut(path);
-
-                if (!string.IsNullOrWhiteSpace(lnk.TargetPath) && System.IO.File.Exists(lnk.TargetPath))
-                {
-                    if (Path.GetExtension(lnk.TargetPath).Equals(".exe", StringComparison.OrdinalIgnoreCase))
-                    {
-                        allApps.Add(new AppModel
-                        {
-                            Name = Path.GetFileNameWithoutExtension(path),
-                            Path = lnk.TargetPath
-                        });
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in TryAddShortcut for {path}: {ex.Message}");
-            }
+            _resizeTimer.Stop();
+            _resizeTimer.Start();
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (SearchBox.Text == "") SearchBox.Background = new SolidColorBrush(Colors.Transparent);
-            else SearchBox.Background = new SolidColorBrush(Colors.White);
+            SearchPlaceHolder.Foreground = string.IsNullOrWhiteSpace(SearchBox.Text)
+                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor))
+                : new SolidColorBrush(Colors.Transparent);
+            SearchBox.Foreground = !string.IsNullOrWhiteSpace(SearchBox.Text)
+                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor))
+                : new SolidColorBrush(Colors.Transparent);
+            ClearSearchBoxButton.Visibility = !string.IsNullOrWhiteSpace(SearchBox.Text)
+                ? Visibility.Visible :
+                Visibility.Hidden;
             ApplyFilterAndReset();
             RenderCurrentPage();
         }
@@ -396,12 +333,24 @@ namespace AppLauncher
         private void ApplyFilterAndReset()
         {
             string q = SearchBox.Text?.Trim() ?? string.Empty;
+
             if (string.IsNullOrEmpty(q))
-                filteredApps = allApps.ToList();
-            else
+            {
                 filteredApps = allApps
-                    .Where(a => a.Name.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .OrderByDescending(a => a.Rate)
+                    .ThenBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase)
                     .ToList();
+            }
+            else
+            {
+                filteredApps = allApps
+                    .Select(a => new { App = a, Score = searchEngine.ComputeScore(q, a.Name) })
+                    .Where(x => x.Score > 0.3)
+                    .OrderByDescending(x => x.App.Rate)
+                    .ThenByDescending(x => x.Score)
+                    .Select(x => x.App)
+                    .ToList();
+            }
 
             currentPage = 0;
             ClampPage();
@@ -468,7 +417,7 @@ namespace AppLauncher
             PageLabel.Text = $"{currentPage + 1} / {totalPages}";
         }
 
-        private void RenderCurrentPage()
+        public void RenderCurrentPage()
         {
             AppsPanel.Children.Clear();
 
@@ -477,55 +426,94 @@ namespace AppLauncher
                 var noAppText = new TextBlock
                 {
                     Text = "No program found.",
-                    Foreground = new SolidColorBrush(Color.FromRgb(69, 74, 53)),
+                    Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
                     Margin = new Thickness(8),
-                    FontSize = 16
+                    FontSize = 16,
+                    Opacity = 0
                 };
                 AppsPanel.Children.Add(noAppText);
+
+                var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(500))
+                {
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                };
+                noAppText.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+
                 UpdatePageLabel();
                 return;
             }
+
             ClampPage();
             int start = currentPage * itemsPerPage;
             int end = Math.Min(start + itemsPerPage, filteredApps.Count);
+
             AppsPanel.Visibility = Visibility.Visible;
+
             for (int i = start; i < end; i++)
             {
                 var app = filteredApps[i];
                 var tile = CreateTile(app);
+
                 tile.Opacity = 0;
                 tile.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
-                tile.RenderTransform = new TranslateTransform { X = 40 };
+                var translate = new TranslateTransform { Y = 12 };
+                tile.RenderTransform = translate;
+
                 AppsPanel.Children.Add(tile);
-                var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(200))
+
+                var delay = TimeSpan.FromMilliseconds(10 * (i - start));
+
+                var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(30))
                 {
-                    BeginTime = TimeSpan.FromMilliseconds(8 * (i - start))
+                    BeginTime = delay,
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
                 };
 
-                var slide = new DoubleAnimation(40, 0, TimeSpan.FromMilliseconds(200))
+                var slide = new DoubleAnimation(12, 0, TimeSpan.FromMilliseconds(50))
                 {
-                    BeginTime = TimeSpan.FromMilliseconds(8 * (i - start)),
+                    BeginTime = delay,
                     EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
                 };
 
                 tile.BeginAnimation(OpacityProperty, fade);
-                (tile.RenderTransform as TranslateTransform)?.BeginAnimation(TranslateTransform.XProperty, slide);
+                translate.BeginAnimation(TranslateTransform.YProperty, slide);
             }
+        }
+
+        private string FormatRate(long rate)
+        {
+            if (rate < 1000) return $"{rate}";
+            if (rate < 1_000_000) return $"{rate / 1000}K";
+            if (rate < 1_000_000_000) return $"{rate / 1_000_000}M";
+            if (rate < 1_000_000_000_000) return $"{rate / 1_000_000_000}B";
+            return $"{rate}";
+        }
+
+        private void RefreshAppGrid()
+        {
+            RecalculatePagination();
+            ClampPage();
+            RenderCurrentPage();
         }
 
         private FrameworkElement CreateTile(AppModel app)
         {
+            var gridpanel = new Grid
+            {
+                VerticalAlignment = VerticalAlignment.Stretch,
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
             var panel = new StackPanel
             {
                 Orientation = Orientation.Vertical,
                 VerticalAlignment = VerticalAlignment.Center
             };
-
             var img = new Image
             {
+                Name = "AppIMG",
                 Width = 50,
                 Height = 50,
-                Margin = new Thickness(0, 0, 0, 8),
+                Margin = new Thickness(0, -30, 0, 8),
                 Opacity = 0.9
             };
 
@@ -539,36 +527,109 @@ namespace AppLauncher
                 _ = Task.Run(() =>
                 {
                     var icon = TryLoadIcon(app.Path);
-                    if (icon != null)
+                    if (!string.IsNullOrEmpty(app.Path) && icon != null)
                     {
-                        iconCache[app.Path] = icon;
-                        Dispatcher.Invoke(() => img.Source = icon,DispatcherPriority.Background);
+                        try
+                        {
+                            Dispatcher.Invoke(() => img.Source = icon, DispatcherPriority.Background);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error for load pictures apps : " + ex.Message);
+                        }
                     }
                 });
             }
 
-            var txt = new TextBlock
+            var AppsName = new TextBlock
             {
                 Name = "appsName",
                 Text = app.Name,
-                Foreground = new SolidColorBrush(Color.FromRgb(69, 74, 53)),
+                Foreground = foreSec,
                 FontWeight = FontWeights.Bold,
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap,
                 MaxWidth = TILE_W - 16
             };
-            appsName = txt;
+
+            string rateDisplay = "";
+            if (app.Rate > 0)
+            {
+                string formattedRate = FormatRate(app.Rate);
+                rateDisplay = app.Rate > 1 ? $"Used : {formattedRate} times" : $"Used : {formattedRate} time";
+            }
+
+            var rateText = new TextBlock
+            {
+                Name = "ratetxt",
+                Text = rateDisplay,
+                Foreground = foreSec,
+                FontWeight = FontWeights.Bold,
+                TextAlignment = TextAlignment.Center,
+                TextWrapping = TextWrapping.Wrap,
+                MaxWidth = TILE_W - 16
+            };
+
+            ratetxt = rateText;
+            appsName = AppsName;
+            appimg = img;
+
+            string starFilled = "M 24.0098 5 A 1.50015 1.50015 0 0 0 22.6582 5.83008 L 17.5059 16.1348 L 5.27148 18.0176 A 1.50015 1.50015 0 0 0 4.43945 20.5605 L 12.9023 29.0234 L 11.0176 41.2715 A 1.50015 1.50015 0 0 0 13.1934 42.8301 L 24 37.1914 L 34.8066 42.8301 A 1.50015 1.50015 0 0 0 36.9824 41.2715 L 35.0977 29.0234 L 43.5605 20.5605 A 1.50015 1.50015 0 0 0 42.7285 18.0176 L 30.4941 16.1348 L 25.3418 5.83008 A 1.50015 1.50015 0 0 0 24.0098 5 Z";
+            string starOutline = "M 24.0098 5 A 1.50015 1.50015 0 0 0 22.6582 5.83008 L 17.5059 16.1348 L 5.27148 18.0176 A 1.50015 1.50015 0 0 0 4.43945 20.5605 L 12.9023 29.0234 L 11.0176 41.2715 A 1.50015 1.50015 0 0 0 13.1934 42.8301 L 24 37.1914 L 34.8066 42.8301 A 1.50015 1.50015 0 0 0 36.9824 41.2715 L 35.0977 29.0234 L 43.5605 20.5605 A 1.50015 1.50015 0 0 0 42.7285 18.0176 L 30.4941 16.1348 L 25.3418 5.83008 A 1.50015 1.50015 0 0 0 24.0098 5 Z M 24 9.85352 L 28.1582 18.1699 A 1.50015 1.50015 0 0 0 29.2715 18.9824 L 39.3457 20.5332 L 32.4395 27.4395 A 1.50015 1.50015 0 0 0 32.0176 28.7285 L 33.5664 38.7988 L 24.6934 34.1699 A 1.50015 1.50015 0 0 0 23.3066 34.1699 L 14.4336 38.7988 L 15.9824 28.7285 A 1.50015 1.50015 0 0 0 15.5605 27.4395 L 8.6543 20.5332 L 18.7285 18.9824 A 1.50015 1.50015 0 0 0 19.8418 18.1699 L 24 9.85352 Z";
+
+            var favIcon = new System.Windows.Shapes.Path
+            {
+                Data = Geometry.Parse(app.Favorite ? starFilled : starOutline),
+                Fill = app.Favorite ? Brushes.Gold : Brushes.White,
+                StrokeThickness = 1,
+                Stroke = app.Favorite ? Brushes.Gold : Brushes.White,
+                Width = 20,
+                Height = 20,
+                Stretch = Stretch.Uniform,
+                Style = app.Favorite ? FindResource("StarActivePathStyle") as Style : FindResource("StarInactivePathStyle") as Style
+            };
+
+            var favBtn = new Button
+            {
+                Content = favIcon,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Top,
+                Background = Brushes.Transparent,
+                Margin = new Thickness(100, 0, 0, 30),
+                BorderThickness = new Thickness(0),
+                Tag = app,
+                Style = FindResource("AnimatedNavButton") as Style
+            };
+
+            favBtn.Click += (s, e) =>
+            {
+                app.Favorite = !app.Favorite;
+                favIcon.Data = Geometry.Parse(app.Favorite ? starFilled : starOutline);
+                favIcon.Fill = app.Favorite ? Brushes.Gold : Brushes.White;
+                favIcon.Stroke = app.Favorite ? Brushes.Gold : Brushes.White;
+                favIcon.Style = app.Favorite ? FindResource("StarActivePathStyle") as Style : FindResource("StarInactivePathStyle") as Style;
+
+                DatabaseHelper.UpdateFavorite(app);
+
+                if (isFavorite)
+                    ShowFavorites();
+            };
+
+            panel.Children.Add(favBtn);
             panel.Children.Add(img);
-            panel.Children.Add(txt);
+            panel.Children.Add(AppsName);
+            panel.Children.Add(rateText);
 
             var btn = new Button
             {
                 Content = panel,
                 Width = TILE_W,
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundSecundary)),
                 Height = TILE_H,
                 Margin = new Thickness(TILE_MARGIN),
                 Style = FindResource("ModernTileButton") as Style,
-                Tag = app
+                Tag = app,
+                ToolTip = $"{app.Name}\nPath⇒[{app.Path}]\nUsed: {app.Rate} times"
             };
 
             btn.Click += (s, e) => SelectButton(btn);
@@ -577,69 +638,34 @@ namespace AppLauncher
             return btn;
         }
 
-        private FrameworkElement CreateListItem(AppModel app)
+        private void ShowFavorites()
         {
-            var grid = new Grid
-            {
-                Height = 40,
-                Margin = new Thickness(5)
-            };
+            filteredApps = allApps
+                .Where(a => a.Favorite)
+                .OrderByDescending(a => a.Rate)
+                .ThenBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+            currentPage = 0;
+            RenderCurrentPage();
+        }
 
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        private void ShowAllApps()
+        {
+            ApplyFilterAndReset();
+            currentPage = 0;
+            RenderCurrentPage();
+        }
 
-            var img = new Image
+        private void SetButtonGlowColor(Button btn, Color color)
+        {
+            if (btn.Template != null)
             {
-                Width = 32,
-                Height = 32,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(5, 0, 10, 0)
-            };
-
-            if (iconCache.TryGetValue(app.Path, out var cached))
-            {
-                img.Source = cached;
-            }
-            else
-            {
-                img.Source = null;
-                _ = Task.Run(() =>
+                var border = btn.Template.FindName("border", btn) as Border;
+                if (border != null && border.Effect is DropShadowEffect glow)
                 {
-                    var icon = TryLoadIcon(app.Path);
-                    if (icon != null)
-                    {
-                        iconCache[app.Path] = icon;
-                        Dispatcher.Invoke(() => img.Source = icon, System.Windows.Threading.DispatcherPriority.Background);
-                    }
-                });
+                    glow.Color = color;
+                }
             }
-
-            Grid.SetColumn(img, 0);
-
-            var txt = new TextBlock
-            {
-                Text = app.Name,
-                Foreground = Brushes.White,
-                VerticalAlignment = VerticalAlignment.Center,
-                FontSize = 14
-            };
-
-            Grid.SetColumn(txt, 1);
-
-            grid.Children.Add(img);
-            grid.Children.Add(txt);
-
-            var btn = new Button
-            {
-                Content = grid,
-                Style = FindResource("ClassicListItemButton") as Style,
-                Tag = app
-            };
-
-            btn.Click += (s, e) => SelectButton(btn);
-            btn.MouseDoubleClick += LaunchApp;
-
-            return btn;
         }
 
         private void SelectButton(Button btn)
@@ -651,6 +677,8 @@ namespace AppLauncher
 
             selectedButton = btn;
             btn.Style = FindResource("ModernTileButtonSelected") as Style;
+            btn.ApplyTemplate();
+            SetButtonGlowColor(btn, (Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
         }
 
         private void LaunchApp(object sender, MouseButtonEventArgs e)
@@ -659,7 +687,28 @@ namespace AppLauncher
             {
                 try
                 {
+                    Console.WriteLine($"🚀 Launching: {app.Name} (Current Rate: {app.Rate})");
+
                     Process.Start(new ProcessStartInfo(app.Path) { UseShellExecute = true });
+                    app.Rate++;
+
+                    Console.WriteLine($"📊 New Rate: {app.Rate}");
+
+                    DatabaseHelper.UpdateRate(app);
+
+                    allApps.Sort((a, b) =>
+                    {
+                        int rateCompare = b.Rate.CompareTo(a.Rate);
+                        if (rateCompare != 0) return rateCompare;
+                        return string.Compare(a.Name, b.Name, StringComparison.CurrentCultureIgnoreCase);
+                    });
+
+                    Console.WriteLine($"✅ First 3 apps after sort: {string.Join(", ", allApps.Take(3).Select(a => $"{a.Name}({a.Rate})"))}");
+
+                    DatabaseHelper.SaveAppsToDb(allApps);
+
+                    ApplyFilterAndReset();
+                    RenderCurrentPage();
                 }
                 catch (Exception ex)
                 {
@@ -668,14 +717,13 @@ namespace AppLauncher
             }
         }
 
-        private ImageSource TryLoadIcon(string exePath)
+        public ImageSource TryLoadIcon(string exePath)
         {
             try
             {
                 using Icon icon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
                 if (icon == null) return null;
 
-                // آیکون رو بزرگ‌تر بگیر تا کیفیت بالاتر بشه (مثلاً 128x128)
                 var src = Imaging.CreateBitmapSourceFromHIcon(
                     icon.Handle,
                     Int32Rect.Empty,
@@ -718,43 +766,273 @@ namespace AppLauncher
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Right)
+            if ((e.Key == Key.Right && Keyboard.Modifiers == ModifierKeys.Control && SearchBox.IsFocused)
+                || (e.Key == Key.Right && Keyboard.Modifiers == ModifierKeys.Control && !SearchBox.IsFocused))
             {
                 NextBtn_Click(null, null);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Left)
+            else if ((e.Key == Key.Left && Keyboard.Modifiers == ModifierKeys.Control && SearchBox.IsFocused)
+                || (e.Key == Key.Left && Keyboard.Modifiers == ModifierKeys.Control && !SearchBox.IsFocused))
             {
                 PrevBtn_Click(null, null);
                 e.Handled = true;
             }
+            else if ((e.Key == Key.Escape && SearchBox.IsFocused)
+                || (e.Key == Key.Escape && !SearchBox.IsFocused))
+            {
+                ClearSearchBoxButton_Click(null, null);
+                e.Handled = true;
+            }
         }
 
-        private void ApplyTheme()
+        private void Window_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            SearchBox.Effect = new System.Windows.Media.Effects.DropShadowEffect { Color = Colors.White, BlurRadius = 5, ShadowDepth = 0 };
-            SearchBox.Background = new SolidColorBrush(Colors.Transparent);
-            SearchBox.Foreground = new SolidColorBrush(Color.FromRgb(69, 74, 53));
-            SearchBox.BorderThickness = new Thickness(0);
-            this.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-            PrevBtn.Style = FindResource("AnimatedNavButton") as Style;
-            NextBtn.Style = FindResource("AnimatedNavButton") as Style;
-            brSearchBox.Style = FindResource("BorderSearchBox") as Style;
-            Scroller.CanContentScroll = false;
+            if (e.Delta > 0)
+            {
+                PrevBtn_Click(null, null);
+            }
+            else if (e.Delta < 0)
+            {
+                NextBtn_Click(null, null);
+            }
 
-            ParticleCanvas.Background = new SolidColorBrush(Color.FromRgb(233, 233, 233));
-            RecalculatePagination();
+            e.Handled = true;
         }
 
-        private void BtnAboutUs_Click(object sender, RoutedEventArgs e)
+        private void HamburgerButton_Click(object sender, RoutedEventArgs e)
         {
-            AboutUsWindow aboutUsWindow = new AboutUsWindow();
-            aboutUsWindow.tbStatusUpdate.Visibility = isUpdateAvailable ? Visibility.Visible : Visibility.Hidden;
-            aboutUsWindow.UpdateNotifEllips.Visibility = isUpdateAvailable ? Visibility.Visible : Visibility.Hidden;
-            aboutUsWindow.Show();
-            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+            ToggleMenu();
         }
-        #endregion
+
+        private void ToggleMenu()
+        {
+            if (isMenuExpanded)
+            {
+                CollapseMenu();
+            }
+            else
+            {
+                ExpandMenu();
+            }
+        }
+
+        private void ExpandMenu()
+        {
+            Storyboard expandStoryboard = (Storyboard)FindResource("ExpandMenu");
+            expandStoryboard.Begin();
+
+            Storyboard expandFont = (Storyboard)FindResource("ExpandFont");
+            expandFont.Begin();
+
+            isMenuExpanded = true;
+        }
+
+        private void CollapseMenu()
+        {
+            Storyboard collapseStoryboard = (Storyboard)FindResource("CollapseMenu");
+            collapseStoryboard.Begin();
+
+            Storyboard collapseFont = (Storyboard)FindResource("CollapseFont");
+            collapseFont.Begin();
+
+            isMenuExpanded = false;
+        }
+
+        private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // Check if menu is expanded and click is outside the navigation panel
+            if (isMenuExpanded)
+            {
+                // Get the position of the click
+                System.Windows.Point clickPosition = e.GetPosition(this);
+
+                // Get the bounds of the navigation panel
+                System.Windows.Point navPanelPosition = NavigationPanel.TransformToAncestor(this).Transform(new System.Windows.Point(0, 0));
+                Rect navPanelBounds = new Rect(
+                    navPanelPosition.X,
+                    navPanelPosition.Y,
+                    NavigationPanel.ActualWidth,
+                    NavigationPanel.ActualHeight
+                );
+
+                // If click is outside the navigation panel, collapse the menu
+                if (!navPanelBounds.Contains(clickPosition))
+                {
+                    CollapseMenu();
+                }
+            }
+        }
+
+        private void SetActiveButton(Button button)
+        {
+            if (currentActiveButton != null && currentActiveButton != button)
+            {
+                currentActiveButton.Tag = "Inactive";
+            }
+
+            button.Tag = "Active";
+            currentActiveButton = button;
+        }
+
+        // New Navigation Methods
+        private void ViewButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Close menu if expanded
+            if (isMenuExpanded)
+            {
+                CollapseMenu();
+            }
+
+            SetActiveButton(ViewButton);
+            NavigateToView(lastViewPage);
+        }
+
+        private void ExploreButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Close menu if expanded
+            if (isMenuExpanded)
+            {
+                CollapseMenu();
+            }
+
+            SetActiveButton(ExploreButton);
+            var explorePage = new ExplorePage(this, apply) { KeepAlive = false };
+            MainContentControl.Navigate(explorePage);
+            SetVisibleMainContentControl();
+            LauncherBaseGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void SubscriptionButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Close menu if expanded
+            if (isMenuExpanded)
+            {
+                CollapseMenu();
+            }
+
+            SetActiveButton(SubscriptionButton);
+            var subscriptionPage = new SubscriptionPage(apply) { KeepAlive = false };
+            MainContentControl.Navigate(subscriptionPage);
+            SetVisibleMainContentControl();
+            LauncherBaseGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Close menu if expanded
+            if (isMenuExpanded)
+            {
+                CollapseMenu();
+            }
+
+            SetActiveButton(SettingsButton);
+            var settingsPage = new SettingsPage(this, allApps, filteredApps, currentPage, apply) { KeepAlive = false };
+            MainContentControl.Navigate(settingsPage);
+            SetVisibleMainContentControl();
+            LauncherBaseGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void AboutUsButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Close menu if expanded
+            if (isMenuExpanded)
+            {
+                CollapseMenu();
+            }
+
+            SetActiveButton(AboutUsButton);
+            var aboutUsPage = new AboutUsPage(this, apply) { KeepAlive = false };
+            //aboutUsPage.tbStatusUpdate.Visibility = isUpdateAvailable ? Visibility.Visible : Visibility.Hidden;
+            aboutUsPage.UpdateBadge.Visibility = isUpdateAvailable ? Visibility.Visible : Visibility.Hidden;
+            MainContentControl.Navigate(aboutUsPage);
+            SetVisibleMainContentControl();
+            LauncherBaseGrid.Visibility = Visibility.Hidden;
+        }
+
+        // Public method to navigate to View with specific page
+        public void NavigateToView(string pageName)
+        {
+            lastViewPage = pageName;
+            SetActiveButton(ViewButton);
+
+            switch (pageName)
+            {
+                case "Launcher":
+                    ShowAllApps();
+                    isFavorite = false;
+                    LauncherBaseGrid.Visibility = Visibility.Visible;
+                    SetHiddenMainContentControl();
+                    break;
+
+                case "Favorites":
+                    ShowFavorites();
+                    isFavorite = true;
+                    LauncherBaseGrid.Visibility = Visibility.Visible;
+                    SetHiddenMainContentControl();
+                    break;
+
+                case "Bookmarks":
+                    var bookmarkPage = new BookmarkPage(apply) { KeepAlive = false };
+                    MainContentControl.Navigate(bookmarkPage);
+                    SetVisibleMainContentControl();
+                    LauncherBaseGrid.Visibility = Visibility.Hidden;
+                    break;
+
+                case "TaskManager":
+                    var taskPage = new TaskManagerPage(apply) { KeepAlive = false };
+                    MainContentControl.Navigate(taskPage);
+                    SetVisibleMainContentControl();
+                    LauncherBaseGrid.Visibility = Visibility.Hidden;
+                    break;
+
+                default:
+                    ShowAllApps();
+                    isFavorite = false;
+                    LauncherBaseGrid.Visibility = Visibility.Visible;
+                    SetHiddenMainContentControl();
+                    break;
+            }
+        }
+
+        private void SetVisibleMainContentControl()
+        {
+            MainContentControl.NavigationUIVisibility = NavigationUIVisibility.Hidden;
+            MainContentControl.Background = Brushes.Transparent;
+            MainContentControl.Visibility = Visibility.Visible;
+        }
+
+        private void SetHiddenMainContentControl()
+        {
+            MainContentControl.NavigationUIVisibility = NavigationUIVisibility.Hidden;
+            MainContentControl.Background = Brushes.Transparent;
+            MainContentControl.Visibility = Visibility.Hidden;
+        }
+
+        public void NavigateToSettingsPage()
+        {
+            SetActiveButton(SettingsButton);
+            var settingsPage = new SettingsPage(this, allApps, filteredApps, currentPage, apply) { KeepAlive = false };
+            MainContentControl.Navigate(settingsPage);
+            SetVisibleMainContentControl();
+            LauncherBaseGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void ClearSearchBoxButton_Click(object sender, RoutedEventArgs e)
+        {
+            SearchBox.Clear();
+        }
+
+        private void Path_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is System.Windows.Shapes.Path p)
+                p.Opacity = 0.3;
+        }
+
+        private void Path_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (sender is System.Windows.Shapes.Path p)
+                p.Opacity = 1;
+        }
     }
-
 }

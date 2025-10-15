@@ -1,0 +1,456 @@
+﻿<Page x:Class="AppLauncher.Views.Pages.SettingsPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:local="clr-namespace:AppLauncher.Views.Pages" mc:Ignorable="d" ButtonBase.Click="ApplyBtn_Click" d:DesignHeight="600" d:DesignWidth="1000" Title="Settings" FontFamily="Nunito">
+    <Page.Resources>
+        <SolidColorBrush x:Key="BackgroundSelectedTabItem" Color="#7F000000"/><!-- Background Selected TabItem -->
+        <SolidColorBrush x:Key="ForegroundSelectedTbItem" Color="White"/><!-- Foreground Selected TabItem -->
+        <SolidColorBrush x:Key="BackgroundHoverTbItem" Color="#FFFFFFFF"/><!-- Background Hover TabItem -->
+        <SolidColorBrush x:Key="ForegroundHoverTbItem" Color="Black"/><!-- Foreground Hover TabItem -->
+        <SolidColorBrush x:Key="BackNotSelectedTbItem" Color="#7FFFFFFF"/><!-- Foreground NotSelected TabItem -->
+        <SolidColorBrush x:Key="ForeNotSelectedTbItem" Color="#FF000000"/><!-- Foreground NotSelected TabItem -->
+        <Style TargetType="TabItem">
+            <Setter Property="Background" Value="{DynamicResource BackNotSelectedTbItem}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForeNotSelectedTbItem}"/>
+            <Setter Property="BorderThickness" Value="0.5"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Margin" Value="0 0 5 0"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Padding" Value="10, 6"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border CornerRadius="15" Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" Margin="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True" RecognizesAccessKey="True" Margin="{TemplateBinding Margin}" ContentSource="Header" Focusable="False"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource BackgroundHoverTbItem}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegroundHoverTbItem}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource BackgroundSelectedTabItem}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BackgroundSelectedTabItem}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegroundSelectedTbItem}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="{DynamicResource SecundaryBlueColor}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid SnapsToDevicePixels="True">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="50"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TabPanel Grid.Row="0" Background="Transparent" IsItemsHost="True" HorizontalAlignment="Center"/>
+                            <Border Grid.Row="1" CornerRadius="15" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}">
+                                <ContentPresenter ContentSource="SelectedContent" SnapsToDevicePixels="True" Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+    <Grid x:Name="gridMain" Background="#FF003554">
+        <Border x:Name="brMain" Background="#FF577590" Margin="30" CornerRadius="10" Padding="30">
+            <TabControl>
+                <TabItem Header="Security" x:Name="SecurityTab">
+                    <Grid Margin="20">
+                        <Grid.RowDefinitions><!-- Gmail -->
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions><!-- Send Log + Get Pro -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10"/><!-- Reset Options -->
+                        <Border Grid.Row="1" Background="#7f000000" CornerRadius="15" Margin="0,10" Padding="15" VerticalAlignment="Center">
+                            <StackPanel>
+                                <TextBlock Text="Reset Options" Foreground="White" FontFamily="Nunito" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                <UniformGrid Columns="2" HorizontalAlignment="Center" Margin="0,10">
+                                    <Button x:Name="ResetFavButton" Content="Reset Favorite Apps" Style="{StaticResource AnimatedNavButton}" Margin="20,0" Click="ResetFavButton_Click"/>
+                                    <Button x:Name="ResetRateButton" Content="Reset Rate Apps" Style="{StaticResource AnimatedNavButton}" Click="ResetRateButton_Click"/>
+                                </UniformGrid>
+                                <Separator Margin="0,15" Background="#7FFFFFFF"/>
+                                <TextBlock Text="Bookmark Options" Foreground="White" FontFamily="Nunito" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,5"/>
+                                <UniformGrid Columns="2" HorizontalAlignment="Center" Margin="0,10">
+                                    <Button x:Name="ResetAllBookmarksButton" Content="Reset All Bookmarks" Style="{StaticResource AnimatedNavButton}" Margin="20,0" Height="40" Click="ResetAllBookmarksButton_Click"/>
+                                    <Button x:Name="ResetBookmarkFavButton" Content="Reset Bookmark Favorites" Style="{StaticResource AnimatedNavButton}" Margin="20,0" Click="ResetBookmarkFavButton_Click"/>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+                        <Grid Grid.Row="2" HorizontalAlignment="Center" Visibility="Collapsed" x:Name="proCirLoading" Width="24" Height="24" VerticalAlignment="Center" Margin="300,1,0,0"><!-- Arc مشابه 25% دایره -->
+                            <Path Stroke="White" StrokeThickness="3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M12,2 A10,10 0 0 1 22,12" RenderTransformOrigin="0.5,0.5">
+                                <Path.RenderTransform>
+                                    <RotateTransform x:Name="ringRotate" Angle="0"/>
+                                </Path.RenderTransform>
+                            </Path><!-- چرخش مدام -->
+                            <Grid.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="ringRotate" Storyboard.TargetProperty="Angle" From="0" To="360" Duration="0:0:0.3"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Grid.Triggers>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Themes" x:Name="ThemesTab">
+                    <Border Padding="10" Background="White" CornerRadius="10" x:Name="brThemes">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="NeonCyan" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" Style="{StaticResource AnimatedNavButton}" Click="SetTheme_Click">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Height="150">
+                                    <Ellipse x:Name="DefEll" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" Margin="0,20,0,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush x:Name="EllipseBrush" Color="#00F7F3"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Triggers><!-- MouseEnter Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger><!-- MouseLeave Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                    <TextBlock x:Name="txtTh" Text="Cyan" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="foreTxtBlock" Color="Black"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <Button Click="SetTheme_Click" x:Name="NeonGreen" Grid.Column="2" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" Style="{StaticResource AnimatedNavButton}">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Height="150">
+                                    <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" StrokeThickness="10" Margin="0,20,0,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush x:Name="EllipseBrush1" Color="#39FF14"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Triggers><!-- MouseEnter Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger><!-- MouseLeave Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                    <TextBlock x:Name="txtTh1" Text="Green" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="foreTxtBlock1" Color="Black"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <Button Click="SetTheme_Click" x:Name="NeonYellow" Grid.Column="4" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" Style="{StaticResource AnimatedNavButton}">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Height="150">
+                                    <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" StrokeThickness="10" Margin="0,20,0,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush x:Name="EllipseBrush2" Color="#F9FF00"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Triggers><!-- MouseEnter Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger><!-- MouseLeave Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                    <TextBlock x:Name="txtTh2" Text="Yellow" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="foreTxtBlock2" Color="Black"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <Button Click="SetTheme_Click" x:Name="NeonOrange" Grid.Column="6" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" Style="{StaticResource AnimatedNavButton}">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Height="150">
+                                    <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" StrokeThickness="10" Margin="0,20,0,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush x:Name="EllipseBrush3" Color="#FF6B00"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Triggers><!-- MouseEnter Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger><!-- MouseLeave Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                    <TextBlock x:Name="txtTh3" Text="Orange" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="foreTxtBlock3" Color="Black"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <Button Click="SetTheme_Click" x:Name="NeonRed" Grid.Column="8" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" Style="{StaticResource AnimatedNavButton}">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Height="150">
+                                    <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" StrokeThickness="10" Margin="0,20,0,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush x:Name="EllipseBrush4" Color="#FF1744"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Triggers><!-- MouseEnter Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger><!-- MouseLeave Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                    <TextBlock x:Name="txtTh4" Text="Red" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="foreTxtBlock4" Color="Black"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <Button Click="SetTheme_Click" x:Name="NeonPurple" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="2" Style="{StaticResource AnimatedNavButton}">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Height="150">
+                                    <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" StrokeThickness="10" Margin="0,20,0,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush x:Name="EllipseBrush5" Color="#A100FF"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Triggers><!-- MouseEnter Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger><!-- MouseLeave Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                    <TextBlock x:Name="txtTh5" Text="Purple" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="foreTxtBlock5" Color="Black"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <Button Click="SetTheme_Click" x:Name="NeonPink" Grid.Column="2" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="2" Style="{StaticResource AnimatedNavButton}">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Height="150">
+                                    <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" StrokeThickness="10" Margin="0,20,0,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush x:Name="EllipseBrush6" Color="#FF00C8"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Triggers><!-- MouseEnter Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger><!-- MouseLeave Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                    <TextBlock x:Name="txtTh6" Text="Pink" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="foreTxtBlock6" Color="Black"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <Button Click="SetTheme_Click" x:Name="NeonCobaltBlue" Grid.Column="4" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="2" Style="{StaticResource AnimatedNavButton}">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Height="150">
+                                    <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" StrokeThickness="10" Margin="0,20,0,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush x:Name="EllipseBrush7" Color="#007BFF"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Triggers><!-- MouseEnter Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger><!-- MouseLeave Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                    <TextBlock x:Name="txtTh7" Text="CobaltBlue" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="foreTxtBlock7" Color="Black"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <Button Click="SetTheme_Click" x:Name="NeonTeal" Grid.Column="6" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="2" Style="{StaticResource AnimatedNavButton}">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Height="150">
+                                    <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" StrokeThickness="10" Margin="0,20,0,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush x:Name="EllipseBrush8" Color="#00FFD1"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Triggers><!-- MouseEnter Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger><!-- MouseLeave Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                    <TextBlock x:Name="txtTh8" Text="Teal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="foreTxtBlock8" Color="Black"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <Button Click="SetTheme_Click" x:Name="NeonGold" Grid.Column="8" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="2" Style="{StaticResource AnimatedNavButton}">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="150" Height="150">
+                                    <Ellipse HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" StrokeThickness="10" Margin="0,20,0,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush x:Name="EllipseBrush9" Color="#FFC300"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Triggers><!-- MouseEnter Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger><!-- MouseLeave Trigger -->
+                                            <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+                                    <TextBlock x:Name="txtTh9" Text="Gold" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="foreTxtBlock9" Color="Black"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <TextBlock x:Name="StatusSelectedTheme" VerticalAlignment="Bottom" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="6" TextAlignment="Justify" Margin="0,0,0,-40" FontSize="16" FontFamily="Nunito" FontWeight="Black"/>
+                        </Grid>
+                    </Border>
+                </TabItem>
+                <TabItem Header="Browsers" x:Name="BrowsersTab">
+                    <Grid Margin="20">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Custom Browser Configuration" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
+                        <Border Grid.Row="1" Background="#7fFFFFFF" CornerRadius="10" Padding="15">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="CustomBrowsersPanel"><!-- Custom browsers will be added here dynamically --></StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                        <Button Grid.Row="2" Content="+ Add Custom Browser" Style="{StaticResource AnimatedNavButton}" HorizontalAlignment="Center" Margin="0,15,0,0" Click="AddCustomBrowser_Click" Height="35" Width="200"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Border>
+    </Grid>
+</Page>

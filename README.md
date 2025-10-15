@@ -19,7 +19,7 @@ This software helps you organize, search, and run your installed programs quickl
 - 🔗 **External Links** – Quick access to Telegram channel and GitHub repository.  
 
 ### 🎯 Problem It Solves
-Windows Start Menu is often cluttered and slow to navigate.  
+The Windows start menu and the Windows desktop page are crowded and it is not always easy to find programs, and sometimes it may affect and afford the speed and efficiency of RAM and CPU. 
 This application provides a **faster, cleaner, and customizable way** to access your installed software with better visuals and search functionality.
 
 ---
@@ -38,7 +38,7 @@ This application provides a **faster, cleaner, and customizable way** to access 
 - 🔗 **لینک‌های سریع** – دسترسی فوری به کانال تلگرام و مخزن گیت‌هاب.  
 
 ### 🎯 مشکلی که حل می‌کند
-منوی استارت ویندوز شلوغ و کند است و پیدا کردن برنامه‌ها همیشه ساده نیست.  
+منوی شروع ویندوز و صفحه دسکتاپ ویندوز شلوغ است و پیدا کردن برنامه‌ها همیشه ساده نیست و در بعضی مواقع ممکن است سرعت و راندمان Ram و CPU را درگیر و اِشغال کند.
 این نرم‌افزار یک **راه سریع‌تر، زیباتر و کاربرپسندتر** برای دسترسی به برنامه‌های نصب شده فراهم می‌کند.
 
 ---
@@ -51,7 +51,7 @@ This application provides a **faster, cleaner, and customizable way** to access 
 ---
 
 ## ⚙️ Installation
-1. Download the latest installer from [Releases](https://github.com/MehranQadirian/Uprix-Application/releases).  
+1. Download the latest installer [[DOWNLOAD]](https://github.com/MehranQadirian/Uprix-Application/releases/download/v2.3.0.1/AppLauncher-Setup.exe).  
 2. Run the setup file and follow the instructions.  
 3. Enjoy faster app launching 🚀  
 
@@ -60,5 +60,5 @@ This application provides a **faster, cleaner, and customizable way** to access 
 ## 🧑‍💻 Developer
 Developed by **Mehran Qadirian**  
 - 🌐 [GitHub Repository](https://github.com/MehranQadirian/Uprix-Application)  
-- 📬 mehranghadirian01@gmail.com  
+- 📬 [Chat & Feedback](https://t.me/UprixChatBot) 
 - 📢 [Telegram Channel](https://t.me/UprixApplication)  

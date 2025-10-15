@@ -1,0 +1,83 @@
+﻿<Window x:Class="AppLauncher.Views.Windows.UpdateWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Updater" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Width="520" Height="260.8" Background="#00454A35" WindowStyle="None" AllowsTransparency="False" ShowInTaskbar="True">
+    <Border x:Name="brMain" Background="#FF00CDFF" CornerRadius="15">
+        <Grid Margin="18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="14"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="12"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="Title" Text="GitHub Auto-Update" Foreground="#FFe9e9e9" FontSize="20" FontWeight="SemiBold"/>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock x:Name="lblStatus" Text="Status:" Foreground="#FFe9e9e9" Margin="0,0,8,0"/>
+                <TextBlock x:Name="StatusText" Foreground="#FFFBc82d" Text="Checking latest release…"/>
+            </StackPanel>
+            <Border x:Name="SubBorder" Grid.Row="4" CornerRadius="14" Background="#eee" Padding="16" BorderBrush="#2B2B43" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0">
+                        <TextBlock Text="Progress" Foreground="#FF454a35" DockPanel.Dock="Left"/>
+                        <TextBlock x:Name="PercentText" Text="0%" Margin="10,0" Foreground="#000" FontWeight="SemiBold" DockPanel.Dock="Right"/>
+                    </DockPanel>
+                    <Grid Grid.Row="2" Height="10" Background="Transparent" ClipToBounds="True" SnapsToDevicePixels="True">
+                        <Border x:Name="brProgress" CornerRadius="5" Background="#fff" BorderBrush="#FF454A35" BorderThickness="1"/>
+                        <Border x:Name="ProgressFill" CornerRadius="5" HorizontalAlignment="Left" Width="0" Background="Red">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" BlurRadius="10" ShadowDepth="0" Opacity="0.35"/>
+                            </Border.Effect>
+                        </Border>
+                        <Grid x:Name="IndeterminateShimmer" Visibility="Collapsed" IsHitTestVisible="False">
+                            <Rectangle Opacity="0.35">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#FF454A35" Offset="0"/>
+                                        <GradientStop Color="#FFC2FF00" Offset="0.5"/>
+                                        <GradientStop Color="#FF454A35" Offset="0.994"/>
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Grid.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="-520" To="520" Duration="0:0:0.5">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <SineEase EasingMode="EaseInOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Grid.Triggers>
+                            <Grid.RenderTransform>
+                                <TranslateTransform X="-520"/>
+                            </Grid.RenderTransform>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                <Button x:Name="CancelButton" Content="Cancel" Click="CancelButton_Click" Width="60" Height="35" Padding="16,6" Margin="8,0,0,0" Foreground="#FF454a35" BorderThickness="0" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Border x:Name="border" CornerRadius="10" Background="#FFF" BorderThickness="1" BorderBrush="#FFF">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Border.Effect>
+                                        <DropShadowEffect x:Name="dropShadow" Color="Black" Opacity="0" ShadowDepth="0" BlurRadius="15"/>
+                                    </Border.Effect>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

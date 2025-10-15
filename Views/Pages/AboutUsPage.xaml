@@ -1,0 +1,271 @@
+﻿<Page x:Class="AppLauncher.Views.Pages.AboutUsPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="About Us" Background="{DynamicResource BackgroundPrimary}">
+    <Page.Resources><!-- Optimized Card Style -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BackgroundSecondary}"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="24"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#000000" Opacity="0.06" BlurRadius="16" ShadowDepth="0" RenderingBias="Performance"/>
+                </Setter.Value>
+            </Setter>
+        </Style><!-- Modern Button Style -->
+        <Style x:Key="ModernButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#F5F5F5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style><!-- Social Icon Button Style -->
+        <Style x:Key="SocialIconStyle" TargetType="Border">
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Margin" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#000000" Opacity="0.08" BlurRadius="8" ShadowDepth="0" RenderingBias="Performance"/>
+                </Setter.Value>
+            </Setter>
+        </Style><!-- Text Styles -->
+        <Style x:Key="TitleTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Nunito"/>
+            <Setter Property="FontSize" Value="28"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource MenuIconColor}"/>
+        </Style>
+        <Style x:Key="SubtitleTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Nunito"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{DynamicResource MenuIconColor}"/>
+            <Setter Property="Opacity" Value="0.7"/>
+        </Style>
+        <Style x:Key="BodyTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Nunito"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Foreground" Value="{DynamicResource MenuIconColor}"/>
+            <Setter Property="Opacity" Value="0.8"/>
+            <Setter Property="LineHeight" Value="24"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+    </Page.Resources>
+    <Grid x:Name="RootGrid"><!-- Main Scroll Area -->
+        <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PanningMode="VerticalOnly" CanContentScroll="True" Padding="32,24,32,32">
+            <StackPanel x:Name="ContentContainer" MaxWidth="900"><!-- Hero Section -->
+                <Border x:Name="HeroCard" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions><!-- App Icon -->
+                        <Border Grid.Column="0" Width="64" Height="64" CornerRadius="16" Margin="0,0,20,0" Background="White">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" Opacity="0.1" BlurRadius="12" ShadowDepth="2" RenderingBias="Performance"/>
+                            </Border.Effect>
+                            <Image Source="/Uprix;component/icon-base.ico" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        </Border><!-- App Info -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock x:Name="AppName" Text="Uprix Assistant" Style="{StaticResource TitleTextStyle}"/>
+                            <TextBlock x:Name="AppVersion" Text="Version 3.0.0.0" Style="{StaticResource SubtitleTextStyle}" Margin="0,4,0,0"/>
+                        </StackPanel><!-- Update Badge -->
+                        <Border x:Name="UpdateBadge" Grid.Column="2" Background="#4CAF50" CornerRadius="8" Padding="12,6" Visibility="Collapsed" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="↓" FontSize="14" Foreground="White" FontWeight="Bold" Margin="0,0,6,0"/>
+                                <TextBlock Text="Update" FontFamily="Nunito" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border><!-- About Section -->
+                <Border x:Name="AboutCard" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="About Uprix" Style="{StaticResource TitleTextStyle}" FontSize="20" Margin="0,0,0,12"/>
+                        <TextBlock x:Name="AboutText" Style="{StaticResource BodyTextStyle}">
+                            Uprix is a powerful application launcher designed to streamline your workflow. It intelligently discovers all installed software on your Windows system, providing quick and easy access through an intuitive search interface.
+                            <LineBreak/>
+                            <LineBreak/>
+                            Simply search for any application and launch it with a double-click. Uprix tracks your usage patterns to prioritize your most-used apps, making your daily tasks faster and more efficient.
+                        </TextBlock>
+                    </StackPanel>
+                </Border><!-- Features Grid -->
+                <Grid x:Name="FeaturesGrid" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions><!-- Feature 1 -->
+                    <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <Border Width="40" Height="40" Background="#E8F5E9" CornerRadius="10" HorizontalAlignment="Left" Margin="0,0,0,12">
+                                <Path Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" Fill="#4CAF50" Stretch="Uniform" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Smart Search" Style="{StaticResource TitleTextStyle}" FontSize="18" Margin="0,0,0,8"/>
+                            <TextBlock Text="Find any application instantly with intelligent search algorithms" Style="{StaticResource BodyTextStyle}"/>
+                        </StackPanel>
+                    </Border><!-- Feature 2 -->
+                    <Border Grid.Column="2" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <Border Width="40" Height="40" Background="#FFF3E0" CornerRadius="10" HorizontalAlignment="Left" Margin="0,0,0,12">
+                                <Path Data="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" Fill="#FF9800" Stretch="Uniform" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Usage Tracking" Style="{StaticResource TitleTextStyle}" FontSize="18" Margin="0,0,0,8"/>
+                            <TextBlock Text="Automatically prioritizes frequently used applications for faster access" Style="{StaticResource BodyTextStyle}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid><!-- Developer Section -->
+                <Border x:Name="DeveloperCard" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="Developed by" Style="{StaticResource SubtitleTextStyle}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        <Button x:Name="DeveloperButton" Style="{StaticResource ModernButtonStyle}" Click="LumoraFlowButton_Click">
+                            <TextBlock Text="Lumora Flow" FontFamily="Nunito" FontSize="24" FontWeight="Bold">
+                                <TextBlock.Foreground>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#667eea" Offset="0"/>
+                                        <GradientStop Color="#764ba2" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </TextBlock.Foreground>
+                            </TextBlock>
+                        </Button>
+                        <TextBlock Text="© 2025 All rights reserved" x:Name="txtCRight" Style="{StaticResource SubtitleTextStyle}" FontSize="13" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border><!-- Social Section -->
+                <Border x:Name="SocialCard" Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Connect With Us" Style="{StaticResource TitleTextStyle}" FontSize="20" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><!-- Telegram -->
+                            <Border Style="{StaticResource SocialIconStyle}" x:Name="TelegramIcon" MouseEnter="SocialIcon_MouseEnter" MouseLeave="SocialIcon_MouseLeave" MouseLeftButtonDown="Telegram_Click" ToolTip="Telegram">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#2AABEE" Offset="0"/>
+                                        <GradientStop Color="#229ED9" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M21.936,2.444c-0.745-0.521-1.683-0.599-2.506-0.207L1.942,11.449c-1.312,0.691-1.235,2.581,0.116,3.19 l2.882,0.818c0.739,0.186,1.531,0.049,2.167-0.375l9.088-6.979c0.207-0.158,0.499-0.133,0.673,0.059l-6.544,7.169c-0.292,0.294-0.427,0.676-0.384,1.065l0.622,1.96l7.945,3.783c1.217,0.58,2.642-0.216,2.788-1.556l1.691-15.531C23.075,3.82,22.683,2.967,21.936,2.444z" Fill="White" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border><!-- GitHub -->
+                            <Border Style="{StaticResource SocialIconStyle}" x:Name="GitHubIcon" MouseEnter="SocialIcon_MouseEnter" MouseLeave="SocialIcon_MouseLeave" MouseLeftButtonDown="GitHub_Click" ToolTip="GitHub">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#24292e" Offset="0"/>
+                                        <GradientStop Color="#1B1F23" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.164 22 16.418 22 12c0-5.523-4.477-10-10-10z" Fill="White" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border><!-- Email -->
+                            <Border Style="{StaticResource SocialIconStyle}" x:Name="EmailIcon" MouseEnter="SocialIcon_MouseEnter" MouseLeave="SocialIcon_MouseLeave" MouseLeftButtonDown="Email_Click" ToolTip="Feedback">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#EA4335" Offset="0"/>
+                                        <GradientStop Color="#D93025" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" Fill="White" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border><!-- Update -->
+                            <Border Style="{StaticResource SocialIconStyle}" x:Name="UpdateIcon" MouseEnter="SocialIcon_MouseEnter" MouseLeave="SocialIcon_MouseLeave" MouseLeftButtonDown="Update_Click" ToolTip="Check Updates">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#4CAF50" Offset="0"/>
+                                        <GradientStop Color="#45A049" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z" Fill="White" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer><!-- Feedback Modal -->
+        <Grid x:Name="FeedbackOverlay" Background="#CC000000" Visibility="Collapsed" MouseLeftButtonDown="CloseModal_Click">
+            <Border x:Name="FeedbackModal" Width="500" MaxHeight="600" Background="White" CornerRadius="16" VerticalAlignment="Center" HorizontalAlignment="Center" MouseLeftButtonDown="Modal_StopPropagation">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" Opacity="0.3" BlurRadius="24" ShadowDepth="0" RenderingBias="Performance"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions><!-- Header -->
+                    <Border Grid.Row="0" Background="#667eea" CornerRadius="16,16,0,0" Padding="24,20">
+                        <Grid>
+                            <TextBlock Text="Send Feedback" FontFamily="Nunito" FontSize="22" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                            <Button x:Name="CloseButton" Width="32" Height="32" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" Cursor="Hand" Click="CloseModal_Click">
+                                <Path Data="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" Fill="White" Width="18" Height="18" Stretch="Uniform"/>
+                            </Button>
+                        </Grid>
+                    </Border><!-- Body -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,20" MaxHeight="400">
+                        <StackPanel><!-- Email -->
+                            <TextBlock Text="Email *" FontFamily="Nunito" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <Border BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,4">
+                                <TextBox x:Name="EmailInput" FontFamily="Nunito" FontSize="14" Padding="12" BorderThickness="0" Background="Transparent"/>
+                            </Border>
+                            <TextBlock x:Name="EmailError" FontFamily="Nunito" FontSize="12" Foreground="#E74C3C" Margin="4,4,0,16" Visibility="Collapsed"/><!-- Subject -->
+                            <TextBlock Text="Subject *" FontFamily="Nunito" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <Border BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,16">
+                                <TextBox x:Name="SubjectInput" FontFamily="Nunito" FontSize="14" Padding="12" BorderThickness="0" Background="Transparent"/>
+                            </Border><!-- Message -->
+                            <TextBlock Text="Message *" FontFamily="Nunito" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <Border BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,16">
+                                <TextBox x:Name="MessageInput" FontFamily="Nunito" FontSize="14" Padding="12" BorderThickness="0" Background="Transparent" TextWrapping="Wrap" AcceptsReturn="True" Height="100" VerticalScrollBarVisibility="Auto"/>
+                            </Border><!-- Attach Image -->
+                            <Button x:Name="AttachButton" Content="📎 Attach Image" FontFamily="Nunito" FontSize="14" Background="#F5F5F5" BorderThickness="0" Padding="12,10" Cursor="Hand" Click="AttachImage_Click" HorizontalAlignment="Left">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <TextBlock x:Name="AttachmentName" FontFamily="Nunito" FontSize="13" Foreground="#666" Margin="0,8,0,0" Visibility="Collapsed"/>
+                        </StackPanel>
+                    </ScrollViewer><!-- Footer -->
+                    <Border Grid.Row="2" BorderBrush="#F0F0F0" BorderThickness="0,1,0,0" Padding="24,16" Background="#FAFAFA" CornerRadius="0,0,16,16">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Cancel" FontFamily="Nunito" FontSize="14" Padding="20,10" Background="Transparent" BorderThickness="0" Cursor="Hand" Margin="0,0,8,0" Click="CloseModal_Click"/>
+                            <Button x:Name="SendButton" Content="Send" FontFamily="Nunito" FontSize="14" FontWeight="SemiBold" Padding="24,10" Foreground="White" BorderThickness="0" Cursor="Hand" Click="SendFeedback_Click">
+                                <Button.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#667eea" Offset="0"/>
+                                        <GradientStop Color="#764ba2" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Button.Background>
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </Border><!-- Loading -->
+                    <Border x:Name="LoadingPanel" Grid.RowSpan="3" Background="#F0FFFFFF" CornerRadius="16" Visibility="Collapsed">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock x:Name="LoadingSpinner" Text="⏳" FontSize="40" HorizontalAlignment="Center" Margin="0,0,0,12" RenderTransformOrigin="0.5,0.5">
+                                <TextBlock.RenderTransform>
+                                    <RotateTransform Angle="0"/>
+                                </TextBlock.RenderTransform>
+                            </TextBlock>
+                            <TextBlock Text="Sending..." FontFamily="Nunito" FontSize="16" Foreground="#666"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

@@ -1,0 +1,507 @@
+﻿<Page x:Class="AppLauncher.Views.Pages.TaskManagerPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="1200" Title="Task Manager" Background="{DynamicResource PageBackground}" Loaded="Page_Loaded" FontFamily="Nunito">
+    <Page.Resources><!-- Theme Color Brushes -->
+        <SolidColorBrush x:Key="PageBackground" Color="#F8FAFC"/>
+        <SolidColorBrush x:Key="PrimaryColor" Color="#3B82F6"/>
+        <SolidColorBrush x:Key="PrimaryHover" Color="#2563EB"/>
+        <SolidColorBrush x:Key="SecondaryColor" Color="#6366F1"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#10B981"/>
+        <SolidColorBrush x:Key="DangerColor" Color="#EF4444"/>
+        <SolidColorBrush x:Key="WarningColor" Color="#F59E0B"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="CardBorder" Color="#E5E7EB"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#1F2937"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#6B7280"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#9CA3AF"/>
+        <SolidColorBrush x:Key="SidebarBackground" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="SidebarBorder" Color="#E5E7EB"/>
+        <SolidColorBrush x:Key="SidebarText" Color="#374151"/>
+        <SolidColorBrush x:Key="HoverBackground" Color="#F3F4F6"/>
+        <SolidColorBrush x:Key="SelectedBackground" Color="#EFF6FF"/>
+        <SolidColorBrush x:Key="ProgressBackground" Color="#E5E7EB"/>
+        <SolidColorBrush x:Key="InputBackground" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="InputBorder" Color="#D1D5DB"/>
+        <SolidColorBrush x:Key="InputFocusBorder" Color="#3B82F6"/><!-- Modern Button Style -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource SecondaryColor}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource PrimaryHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style><!-- Icon Button Style -->
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource InputBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorder}"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style><!-- TextBox Style -->
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorder}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource CaretBrushTextBoxes}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="19,10,12,10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" PanningMode="VerticalOnly" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{DynamicResource InputFocusBorder}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style><!-- ComboBox Style -->
+        <Style x:Key="ModernComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style><!-- Card Style -->
+        <Style x:Key="TaskCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="12" ShadowDepth="2"/>
+                </Setter.Value>
+            </Setter>
+        </Style><!-- Sidebar Navigation Item Style -->
+        <Style x:Key="NavItem" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SidebarText}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="GroupName" Value="TaskNavigation"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" CornerRadius="8" Margin="0,1">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource SelectedBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource InputBorder}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style><!-- Toggle Sidebar Button Style -->
+        <Style x:Key="ToggleButton" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource CardBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+    <Grid x:Name="RootGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="SidebarColumn" Width="280"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions><!-- Collapsible Sidebar -->
+        <Border x:Name="SidebarPanel" Grid.Column="0" Background="{DynamicResource PageBackground}" BorderThickness="0,0,1,0" BorderBrush="{DynamicResource InputBorder}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions><!-- Sidebar Header -->
+                <Grid Grid.Row="0" Margin="20,20,20,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Task Manager" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                        <TextBlock x:Name="TodayDateText" Text="Today" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" x:Name="CollapseSidebarButton" Style="{StaticResource IconButton}" ToolTip="Collapse Sidebar" Click="ToggleSidebar_Click" VerticalAlignment="Top" Padding="0" BorderThickness="0">
+                        <Path Data="M 28.4766 5.97852 A 1.50015 1.50015 0 0 0 28.2598 6 L 10.5 6 C 7.48023 6 5 8.48023 5 11.5 L 5 36.5 C 5 39.5198 7.48023 42 10.5 42 L 28.2539 42 A 1.50015 1.50015 0 0 0 28.7402 42 L 37.5 42 C 40.5198 42 43 39.5198 43 36.5 L 43 11.5 C 43 8.48023 40.5198 6 37.5 6 L 28.7461 6 A 1.50015 1.50015 0 0 0 28.4766 5.97852 Z M 10.5 9 L 27 9 L 27 39 L 10.5 39 C 9.10177 39 8 37.8982 8 36.5 L 8 11.5 C 8 10.1018 9.10177 9 10.5 9 Z M 30 9 L 37.5 9 C 38.8982 9 40 10.1018 40 11.5 L 40 36.5 C 40 37.8982 38.8982 39 37.5 39 L 30 39 L 30 9 Z M 18.9844 17.9844 A 1.50015 1.50015 0 0 0 17.9395 20.5605 L 19.875 22.4961 L 12.5039 22.4805 A 1.50015 1.50015 0 1 0 12.4961 25.4805 L 19.8828 25.4961 L 17.9395 27.4395 A 1.50015 1.50015 0 1 0 20.0605 29.5605 L 24.5605 25.0605 A 1.50015 1.50015 0 0 0 24.5605 22.9395 L 20.0605 18.4395 A 1.50015 1.50015 0 0 0 18.9844 17.9844 Z" Width="32" Height="32" Fill="{DynamicResource InputBorder}" Stretch="Uniform" RenderTransformOrigin="0.5,0.5">
+                            <Path.RenderTransform>
+                                <ScaleTransform ScaleX="-1" ScaleY="1"/>
+                            </Path.RenderTransform>
+                        </Path>
+                    </Button>
+                </Grid><!-- Quick Stats -->
+                <Border Grid.Row="1" Background="{DynamicResource SidebarBackground}" CornerRadius="10" Padding="16,12" Margin="16,0,16,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                            <Border BorderThickness="1" Width="28" BorderBrush="#FF3B82F6" CornerRadius="10">
+                                <TextBlock x:Name="TotalTasksCount" Text="0" FontSize="20" FontWeight="Bold" Foreground="#3B82F6" HorizontalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Total" FontSize="10" Foreground="#FF3B82F6" FontWeight="Black" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                            <Border BorderThickness="1" Width="28" BorderBrush="#FFF59E0B" CornerRadius="10">
+                                <TextBlock x:Name="ActiveTasksCount" Text="0" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource WarningColor}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Active" FontSize="10" Foreground="#FFF59E0B" FontWeight="Black" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            <Border BorderThickness="1" Width="28" BorderBrush="#FF10B981" CornerRadius="10">
+                                <TextBlock x:Name="CompletedTasksCount" Text="0" FontSize="20" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Done" FontSize="10" FontWeight="Black" Foreground="#FF10B981" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Border><!-- Navigation -->
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                    <StackPanel Margin="16,0">
+                        <TextBlock Text="VIEWS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextMuted}" Margin="12,0,0,8"/>
+                        <Border CornerRadius="8" BorderThickness="1,1,0,0" BorderBrush="{DynamicResource InputBorder}">
+                            <StackPanel><!-- Views Section -->
+                                <RadioButton x:Name="AllTasksRadio" Style="{StaticResource NavItem}" Checked="ShowAllTasks_Click" IsChecked="True">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M6.77,12.82h16.25v10.5h-7.01c-3.13,0-5.72,2.59-5.72,5.72v78.43c0,3.13,2.58,5.72,5.72,5.72h69.8 c3.14,0,5.72-2.58,5.72-5.72V29.04c0-3.14-2.59-5.72-5.72-5.72h-7.01v-10.5h16.25c3.73,0,6.77,3.07,6.77,6.77v96.51 c0,3.71-3.06,6.77-6.77,6.77H6.77c-3.71,0-6.77-3.05-6.77-6.77V19.59C0,15.86,3.05,12.82,6.77,12.82L6.77,12.82z M37.79,95.89 c-2.01,0-3.64-1.63-3.64-3.64c0-2.01,1.63-3.64,3.64-3.64h26.24c2.01,0,3.64,1.63,3.64,3.64c0,2.01-1.63,3.64-3.64,3.64H37.79 L37.79,95.89z M30.03,73.91c-2.01,0-3.64-1.63-3.64-3.64c0-2.01,1.63-3.64,3.64-3.64h41.76c2.01,0,3.64,1.63,3.64,3.64 c0,2.01-1.63,3.64-3.64,3.64H30.03L30.03,73.91z M23.2,51.94c-2.01,0-3.64-1.63-3.64-3.64s1.63-3.64,3.64-3.64h55.44 c2.01,0,3.64,1.63,3.64,3.64s-1.63,3.64-3.64,3.64H23.2L23.2,51.94z M32.4,9.46h7.68C40.73,4.13,45.04,0,50.26,0 c5.19,0,9.47,4.07,10.17,9.35l8.99,0.11c0.63,0,1.13,0.5,1.13,1.13v15.33c0,0.63-0.5,1.13-1.13,1.13h-37 c-0.61,0-1.13-0.5-1.13-1.13V10.59C31.27,9.97,31.78,9.46,32.4,9.46L32.4,9.46L32.4,9.46L32.4,9.46z M46.06,14.1 c0.69,0.95,1.69,1.89,2.74,2.37c0.86,0.26,1.8,0.28,2.67,0.04c1.36-0.63,2.62-2.14,3.2-3.4c0.07-0.36,0.11-0.73,0.11-1.13 c0-2.67-2.05-4.84-4.57-4.84c-2.53,0-4.57,2.17-4.57,4.84C45.64,12.8,45.79,13.51,46.06,14.1L46.06,14.1L46.06,14.1L46.06,14.1z" Stretch="Uniform" Width="18" Height="18" Fill="{DynamicResource InputBorder}" Margin="0,0,10,0"/><!--<TextBlock Text="📋" FontSize="16" Margin="0,0,10,0"/>-->
+                                        <TextBlock Text="All Tasks" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton x:Name="TodayRadio" Style="{StaticResource NavItem}" Checked="ShowTodayTasks_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M 12.5 6 C 8.92806 6 6 8.92806 6 12.5 L 6 35.5 C 6 39.0719 8.92806 42 12.5 42 L 35.5 42 C 39.0719 42 42 39.0719 42 35.5 L 42 12.5 C 42 8.92806 39.0719 6 35.5 6 L 12.5 6 Z M 12.5 9 L 35.5 9 C 37.4501 9 39 10.5499 39 12.5 L 39 14 L 9 14 L 9 12.5 C 9 10.5499 10.5499 9 12.5 9 Z M 9 17 L 39 17 L 39 35.5 C 39 37.4501 37.4501 39 35.5 39 L 12.5 39 C 10.5499 39 9 37.4501 9 35.5 L 9 17 Z M 15.5 21 A 2.5 2.5 0 0 0 15.5 26 A 2.5 2.5 0 0 0 15.5 21 Z M 24 21 A 2.5 2.5 0 0 0 24 26 A 2.5 2.5 0 0 0 24 21 Z M 32.5 21 A 2.5 2.5 0 0 0 32.5 26 A 2.5 2.5 0 0 0 32.5 21 Z M 15.5 30 A 2.5 2.5 0 0 0 15.5 35 A 2.5 2.5 0 0 0 15.5 30 Z M 24 30 A 2.5 2.5 0 0 0 24 35 A 2.5 2.5 0 0 0 24 30 Z" Stretch="Uniform" Width="18" Height="18" Fill="{DynamicResource InputBorder}" Margin="0,0,10,0"/><!--<TextBlock Text="📅" FontSize="16" Margin="0,0,10,0"/>-->
+                                        <TextBlock Text="Today" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton x:Name="UpcomingRadio" Style="{StaticResource NavItem}" Checked="ShowUpcomingTasks_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M 12.5 6 C 8.92806 6 6 8.92806 6 12.5 L 6 35.5 C 6 39.0719 8.92806 42 12.5 42 L 35.5 42 C 39.0719 42 42 39.0719 42 35.5 L 42 12.5 C 42 8.92806 39.0719 6 35.5 6 L 12.5 6 Z M 12.5 9 L 35.5 9 C 37.4501 9 39 10.5499 39 12.5 L 39 14 L 9 14 L 9 12.5 C 9 10.5499 10.5499 9 12.5 9 Z M 9 17 L 39 17 L 39 35.5 C 39 37.4501 37.4501 39 35.5 39 L 12.5 39 C 10.5499 39 9 37.4501 9 35.5 L 9 17 Z M 27.5 24 C 25.585 24 24 25.585 24 27.5 L 24 31.5 C 24 33.415 25.585 35 27.5 35 L 31.5 35 C 33.415 35 35 33.415 35 31.5 L 35 27.5 C 35 25.585 33.415 24 31.5 24 L 27.5 24 Z M 27.5 27 L 31.5 27 C 31.795 27 32 27.205 32 27.5 L 32 31.5 C 32 31.795 31.795 32 31.5 32 L 27.5 32 C 27.205 32 27 31.795 27 31.5 L 27 27.5 C 27 27.205 27.205 27 27.5 27 Z" Stretch="Uniform" Width="18" Height="18" Fill="{DynamicResource InputBorder}" Margin="0,0,10,0"/><!--<TextBlock Text="📆" FontSize="16" Margin="0,0,10,0"/>-->
+                                        <TextBlock Text="Upcoming" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton x:Name="CompletedRadio" Style="{StaticResource NavItem}" Checked="ShowCompletedTasks_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M 20.5 3 C 18.2034 3 16.3057 4.76662 16.0508 7 L 12.5 7 C 10.0325 7 8 9.0325 8 11.5 L 8 38.5 C 8 40.9675 10.0325 43 12.5 43 L 35.5 43 C 37.9675 43 40 40.9675 40 38.5 L 40 11.5 C 40 9.0325 37.9675 7 35.5 7 L 31.9492 7 C 31.6943 4.76662 29.7966 3 27.5 3 L 20.5 3 Z M 20.5 6 L 27.5 6 C 28.3465 6 29 6.6535 29 7.5 C 29 8.3465 28.3465 9 27.5 9 L 20.5 9 C 19.6535 9 19 8.3465 19 7.5 C 19 6.6535 19.6535 6 20.5 6 Z M 12.5 10 L 16.7695 10 C 17.5812 11.2019 18.9547 12 20.5 12 L 27.5 12 C 29.0453 12 30.4188 11.2019 31.2305 10 L 35.5 10 C 36.3465 10 37 10.6535 37 11.5 L 37 38.5 C 37 39.3465 36.3465 40 35.5 40 L 12.5 40 C 11.6535 40 11 39.3465 11 38.5 L 11 11.5 C 11 10.6535 11.6535 10 12.5 10 Z M 24 16 C 19.029 16 15 20.029 15 25 C 15 29.971 19.029 34 24 34 C 28.971 34 33 29.971 33 25 C 33 20.029 28.971 16 24 16 Z M 29 21 C 29.2558 21 29.5115 21.0975 29.707 21.293 C 30.098 21.684 30.098 22.316 29.707 22.707 L 23.207 29.207 C 23.012 29.402 22.756 29.5 22.5 29.5 C 22.244 29.5 21.988 29.402 21.793 29.207 L 18.293 25.707 C 17.902 25.316 17.902 24.684 18.293 24.293 C 18.684 23.902 19.316 23.902 19.707 24.293 L 22.5 27.0859 L 28.293 21.293 C 28.4885 21.0975 28.7442 21 29 21 Z" Stretch="Uniform" Width="18" Height="18" Fill="{DynamicResource InputBorder}" Margin="0,0,10,0"/><!--<TextBlock Text="✅" FontSize="16" Margin="0,0,10,0"/>-->
+                                        <TextBlock Text="Completed" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton x:Name="ReportRadio" Style="{StaticResource NavItem}" Checked="ShowDailyReport_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M 35.5 14 A 1.50015 1.50015 0 1 0 35.5 17 L 40.8789 17 L 29.5 28.3789 L 18.5605 17.4395 A 1.50015 1.50015 0 0 0 16.4395 17.4395 L 2.43945 31.4395 A 1.50015 1.50015 0 1 0 4.56055 33.5605 L 17.5 20.6211 L 28.4395 31.5605 A 1.50015 1.50015 0 0 0 30.5605 31.5605 L 43 19.1211 L 43 24.5 A 1.50015 1.50015 0 1 0 46 24.5 L 46 15.5 A 1.50015 1.50015 0 0 0 44.5 14 L 35.5 14 Z" Stretch="Uniform" Width="18" Height="18" Fill="{DynamicResource InputBorder}" Margin="0,0,10,0"/><!--<TextBlock Text="📊" FontSize="16" Margin="0,0,10,0"/>-->
+                                        <TextBlock Text="Analytics" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </RadioButton>
+                            </StackPanel>
+                        </Border><!-- Projects Section -->
+                        <Grid Margin="0,24,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="PROJECTS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextMuted}" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Content="+" FontSize="18" FontWeight="Bold" Width="24" Height="24" Padding="0" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextMuted}" Cursor="Hand" Click="AddProject_Click" ToolTip="New Project"/>
+                        </Grid>
+                        <Border CornerRadius="8" BorderThickness="1,1,0,0" BorderBrush="{DynamicResource InputBorder}" MinHeight="20">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly" HorizontalScrollBarVisibility="Disabled" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                                <ListBox x:Name="ProjectsList" Background="Transparent" BorderThickness="0" SelectionChanged="ProjectsList_SelectionChanged" Foreground="{DynamicResource SidebarText}">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                        <Border Background="{TemplateBinding Background}" Padding="12,10" CornerRadius="8" Margin="0,1">
+                                                            <ContentPresenter/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter Property="Background" Value="{DynamicResource SelectedBackground}"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0">
+                                                    <Button Style="{StaticResource IconButton}" ToolTip="Edit Project" Click="EditProject_Click" Tag="{Binding}" Foreground="{DynamicResource InputBorder}" Margin="0,0,8,0" BorderBrush="{DynamicResource InputBorder}">
+                                                        <Path Data="M96.84,2.22l22.42,22.42c2.96,2.96,2.96,7.8,0,10.76l-12.4,12.4L73.68,14.62l12.4-12.4 C89.04-0.74,93.88-0.74,96.84,2.22L96.84,2.22z M70.18,52.19L70.18,52.19l0,0.01c0.92,0.92,1.38,2.14,1.38,3.34 c0,1.2-0.46,2.41-1.38,3.34v0.01l-0.01,0.01L40.09,88.99l0,0h-0.01c-0.26,0.26-0.55,0.48-0.84,0.67h-0.01 c-0.3,0.19-0.61,0.34-0.93,0.45c-1.66,0.58-3.59,0.2-4.91-1.12h-0.01l0,0v-0.01c-0.26-0.26-0.48-0.55-0.67-0.84v-0.01 c-0.19-0.3-0.34-0.61-0.45-0.93c-0.58-1.66-0.2-3.59,1.11-4.91v-0.01l30.09-30.09l0,0h0.01c0.92-0.92,2.14-1.38,3.34-1.38 c1.2,0,2.41,0.46,3.34,1.38L70.18,52.19L70.18,52.19L70.18,52.19z M45.48,109.11c-8.98,2.78-17.95,5.55-26.93,8.33 C-2.55,123.97-2.46,128.32,3.3,108l9.07-32v0l-0.03-0.03L67.4,20.9l33.18,33.18l-55.07,55.07L45.48,109.11L45.48,109.11z M18.03,81.66l21.79,21.79c-5.9,1.82-11.8,3.64-17.69,5.45c-13.86,4.27-13.8,7.13-10.03-6.22L18.03,81.66L18.03,81.66z" Stretch="Uniform" Width="18" Height="18" Fill="{DynamicResource InputBorder}"/>
+                                                    </Button>
+                                                    <Button Style="{StaticResource IconButton}" ToolTip="Delete Project" Click="DeleteProject_Click" Tag="{Binding}" Foreground="{DynamicResource InputBorder}" BorderBrush="{DynamicResource InputBorder}">
+                                                        <Path Data="M39.27,58.64a4.74,4.74,0,1,1,9.47,0V93.72a4.74,4.74,0,1,1-9.47,0V58.64Zm63.6-19.86L98,103a22.29,22.29,0,0,1-6.33,14.1,19.41,19.41,0,0,1-13.88,5.78h-45a19.4,19.4,0,0,1-13.86-5.78l0,0A22.31,22.31,0,0,1,12.59,103L7.74,38.78H0V25c0-3.32,1.63-4.58,4.84-4.58H27.58V10.79A10.82,10.82,0,0,1,38.37,0H72.24A10.82,10.82,0,0,1,83,10.79v9.62h23.35a6.19,6.19,0,0,1,1,.06A3.86,3.86,0,0,1,110.59,24c0,.2,0,.38,0,.57V38.78Zm-9.5.17H17.24L22,102.3a12.82,12.82,0,0,0,3.57,8.1l0,0a10,10,0,0,0,7.19,3h45a10.06,10.06,0,0,0,7.19-3,12.8,12.8,0,0,0,3.59-8.1L93.37,39ZM71,20.41V12.05H39.64v8.36ZM61.87,58.64a4.74,4.74,0,1,1,9.47,0V93.72a4.74,4.74,0,1,1-9.47,0V58.64Z" Stretch="Uniform" Width="18" Height="18" Fill="{DynamicResource InputBorder}"/>
+                                                    </Button>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="0">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Ellipse Width="10" Height="10" Fill="{Binding Color}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Medium" Foreground="{DynamicResource InputBorder}"/>
+                                                            <TextBlock Text="{Binding ProgressText}" FontSize="11" Foreground="{DynamicResource InputBorder}" Margin="0,2,0,0"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer><!-- Quick Action Button -->
+                <Border Grid.Row="3" Padding="16" BorderBrush="{DynamicResource PageBackground}" BorderThickness="0,1,0,0">
+                    <Button Style="{StaticResource ModernButton}" Click="AddTask_Click" HorizontalAlignment="Stretch">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="+" FontSize="18" FontWeight="Bold" Margin="0,0,8,0"/>
+                            <TextBlock Text="New Task" FontSize="14" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Border>
+            </Grid>
+        </Border><!-- Main Content Area -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions><!-- Top Bar with Breadcrumb -->
+            <Border Grid.Row="0" Background="{DynamicResource PageBackground}" Padding="24,20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions><!-- Action Bar -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions><!-- Toggle Button (visible when sidebar is collapsed) -->
+                        <Button x:Name="ExpandSidebarButton" Grid.Column="0" Style="{StaticResource ToggleButton}" FontSize="18" ToolTip="Show Sidebar" Click="ToggleSidebar_Click" Visibility="Collapsed" Margin="0,0,16,0" Padding="0">
+                            <Path Data="M 28.4766 5.97852 A 1.50015 1.50015 0 0 0 28.2598 6 L 10.5 6 C 7.48023 6 5 8.48023 5 11.5 L 5 36.5 C 5 39.5198 7.48023 42 10.5 42 L 28.2539 42 A 1.50015 1.50015 0 0 0 28.7402 42 L 37.5 42 C 40.5198 42 43 39.5198 43 36.5 L 43 11.5 C 43 8.48023 40.5198 6 37.5 6 L 28.7461 6 A 1.50015 1.50015 0 0 0 28.4766 5.97852 Z M 10.5 9 L 27 9 L 27 39 L 10.5 39 C 9.10177 39 8 37.8982 8 36.5 L 8 11.5 C 8 10.1018 9.10177 9 10.5 9 Z M 30 9 L 37.5 9 C 38.8982 9 40 10.1018 40 11.5 L 40 36.5 C 40 37.8982 38.8982 39 37.5 39 L 30 39 L 30 9 Z M 18.9844 17.9844 A 1.50015 1.50015 0 0 0 17.9395 20.5605 L 19.875 22.4961 L 12.5039 22.4805 A 1.50015 1.50015 0 1 0 12.4961 25.4805 L 19.8828 25.4961 L 17.9395 27.4395 A 1.50015 1.50015 0 1 0 20.0605 29.5605 L 24.5605 25.0605 A 1.50015 1.50015 0 0 0 24.5605 22.9395 L 20.0605 18.4395 A 1.50015 1.50015 0 0 0 18.9844 17.9844 Z" Stretch="Uniform" Width="30" Height="30" Fill="{DynamicResource InputBorder}"/>
+                        </Button><!-- Search and Actions -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Grid>
+                                <Border Background="{DynamicResource SidebarBackground}" CornerRadius="8"/>
+                                <Path Data="M 20.5 6 C 12.5096 6 6 12.5096 6 20.5 C 6 28.4904 12.5096 35 20.5 35 C 23.9564 35 27.1337 33.779 29.6289 31.75 L 39.4395 41.5605 A 1.50015 1.50015 0 1 0 41.5605 39.4395 L 31.75 29.6289 C 33.779 27.1337 35 23.9564 35 20.5 C 35 12.5096 28.4904 6 20.5 6 Z M 20.5 9 C 26.869 9 32 14.131 32 20.5 C 32 23.6026 30.7762 26.4057 28.791 28.4707 A 1.50015 1.50015 0 0 0 28.4707 28.791 C 26.4057 30.7762 23.6026 32 20.5 32 C 14.131 32 9 26.869 9 20.5 C 9 14.131 14.131 9 20.5 9 Z" Stretch="Uniform" Width="22" Height="22" HorizontalAlignment="Left" Margin="10,0" Fill="{DynamicResource TextMuted}" x:Name="searchSVG" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="SearchPlaceHolder" Text="Search tasks..." Grid.Column="1" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" Margin="40,0,0,0" FontSize="14"/>
+                                <TextBox x:Name="SearchBox" Style="{StaticResource ModernTextBox}" Width="300" Background="Transparent" TextChanged="SearchBox_TextChanged"/>
+                            </Grid>
+                            <ComboBox x:Name="SortComboBox" Style="{StaticResource DarkComboBox}" Width="140" Margin="12,0,0,0" SelectionChanged="SortTasks_Changed">
+                                <ComboBoxItem Content="Sort by Date" IsSelected="True"/>
+                                <ComboBoxItem Content="Sort by Priority"/>
+                                <ComboBoxItem Content="Sort by Status"/>
+                                <ComboBoxItem Content="Sort by Title"/>
+                            </ComboBox>
+                            <ComboBox x:Name="FilterComboBox" Style="{StaticResource DarkComboBox}" Width="140" Margin="12,0,0,0" SelectionChanged="FilterTasks_Changed">
+                                <ComboBoxItem Content="All Statuses" IsSelected="True"/>
+                                <ComboBoxItem Content="Pending"/>
+                                <ComboBoxItem Content="In Progress"/>
+                                <ComboBoxItem Content="Completed"/>
+                                <ComboBoxItem Content="On Hold"/>
+                            </ComboBox>
+                            <Button Style="{StaticResource IconButton}" Click="RefreshData_Click" ToolTip="Refresh" Margin="12,0,0,0" Padding="0">
+                                <Path Data="M16.08,59.26A8,8,0,0,1,0,59.26a59,59,0,0,1,97.13-45V8a8,8,0,1,1,16.08,0V33.35a8,8,0,0,1-8,8L80.82,43.62a8,8,0,1,1-1.44-15.95l8-.73A43,43,0,0,0,16.08,59.26Zm22.77,19.6a8,8,0,0,1,1.44,16l-10.08.91A42.95,42.95,0,0,0,102,63.86a8,8,0,0,1,16.08,0A59,59,0,0,1,22.3,110v4.18a8,8,0,0,1-16.08,0V89.14h0a8,8,0,0,1,7.29-8l25.31-2.3Z" Stretch="Uniform" Width="25" Height="25" Fill="{DynamicResource InputBorder}"/>
+                            </Button>
+                            <Button Style="{StaticResource IconButton}" Click="ExportTasks_Click" ToolTip="Export Tasks" Margin="8,0,0,0" Padding="0">
+                                <Path Data="M153.764 151.353c-7.838-.333-13.409-2.935-16.619-7.822-8.724-13.076 3.18-25.997 11.443-35.099 23.441-25.725 80.888-87.554 92.454-101.162 8.768-9.693 21.25-9.693 30.017 0 11.948 13.959 72.287 78.604 94.569 103.628 7.731 8.705 17.292 20.579 9.239 32.633-3.287 4.887-8.798 7.489-16.636 7.822H310.65v96.177c0 12.558-10.304 22.868-22.871 22.868h-63.544c-12.572 0-22.871-10.294-22.871-22.868v-96.177h-47.6zm-153 97.863c-2.622-10.841 1.793-19.33 8.852-24.342a24.767 24.767 0 018.47-3.838c3.039-.738 6.211-.912 9.258-.476 8.585 1.232 16.409 6.775 19.028 17.616a668.81 668.81 0 014.56 20.165 1259.68 1259.68 0 013.611 17.72c4.696 23.707 8.168 38.569 16.924 45.976 9.269 7.844 26.798 10.55 60.388 10.55h254.297c31.012 0 47.192-2.965 55.706-10.662 8.206-7.418 11.414-21.903 15.564-44.131a1212.782 1212.782 0 013.628-18.807c1.371-6.789 2.877-13.766 4.586-20.811 2.619-10.838 10.438-16.376 19.023-17.616 3.02-.434 6.173-.256 9.212.474 3.071.738 5.998 2.041 8.519 3.837 7.05 5.007 11.457 13.474 8.855 24.294l-.011.046a517.834 517.834 0 00-4.181 18.988c-1.063 5.281-2.289 11.852-3.464 18.144l-.008.047c-6.124 32.802-11.141 55.308-27.956 71.112-16.565 15.572-42.513 22.159-89.473 22.159H131.857c-49.096 0-76.074-5.911-93.429-21.279-17.783-15.75-23.173-38.615-30.047-73.314-1.39-7.029-2.728-13.738-3.638-18.091-1.281-6.11-2.6-12.081-3.979-17.761z" Stretch="Uniform" Width="25" Height="25" Fill="{DynamicResource InputBorder}"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid><!-- Title Section -->
+                    <StackPanel Grid.Row="1" Margin="0,16,0,0">
+                        <TextBlock x:Name="ViewTitleText" Text="All Tasks" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                        <TextBlock x:Name="ViewSubtitleText" Text="Manage your tasks efficiently" FontSize="14" Foreground="{DynamicResource TextMuted}" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border><!-- Tasks Content -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly" Padding="24" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                <StackPanel x:Name="TasksContainer"><!-- Tasks will be dynamically added here --></StackPanel>
+            </ScrollViewer>
+        </Grid><!-- Add/Edit Task Dialog -->
+        <Border x:Name="TaskDialog" Grid.ColumnSpan="2" Background="#CC000000" Visibility="Collapsed">
+            <Border Background="{DynamicResource CardBackground}" Width="650" MaxHeight="750" CornerRadius="16" Padding="32">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" Opacity="0.3" BlurRadius="30" ShadowDepth="0"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0,0,0,24">
+                        <TextBlock x:Name="DialogTitle" Text="Create New Task" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                        <Button Style="{StaticResource IconButton}" FontSize="20" HorizontalAlignment="Right" Click="CancelDialog_Click" Padding="0">
+                            <Path Data="M90.914,5.296c6.927-7.034,18.188-7.065,25.154-0.068 c6.961,6.995,6.991,18.369,0.068,25.397L85.743,61.452l30.425,30.855c6.866,6.978,6.773,18.28-0.208,25.247 c-6.983,6.964-18.21,6.946-25.074-0.031L60.669,86.881L30.395,117.58c-6.927,7.034-18.188,7.065-25.154,0.068 c-6.961-6.995-6.992-18.369-0.068-25.397l30.393-30.827L5.142,30.568c-6.867-6.978-6.773-18.28,0.208-25.247 c6.983-6.963,18.21-6.946,25.074,0.031l30.217,30.643L90.914,5.296L90.914,5.296z" Stretch="Uniform" Width="25" Height="25" Fill="{DynamicResource InputBorder}"/>
+                        </Button>
+                    </Grid>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                        <StackPanel>
+                            <TextBlock Text="Task Title *" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8"/>
+                            <TextBox x:Name="TaskTitleInput" Style="{StaticResource ModernTextBox}" Margin="0,0,0,20"/>
+                            <TextBlock Text="Description" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8"/>
+                            <TextBox x:Name="TaskDescriptionInput" Style="{StaticResource ModernTextBox}" TextWrapping="Wrap" AcceptsReturn="True" Height="100" Margin="0,0,0,20"/>
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Project *" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8"/>
+                                    <ComboBox x:Name="TaskProjectInput" Style="{StaticResource ModernComboBox}" DisplayMemberPath="Name"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Status *" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8"/>
+                                    <ComboBox x:Name="TaskStatusInput" Style="{StaticResource ModernComboBox}"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Priority" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8"/>
+                                    <ComboBox x:Name="TaskPriorityInput" Style="{StaticResource ModernComboBox}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Due Date" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8"/>
+                                    <DatePicker x:Name="TaskDueDateInput" Background="{DynamicResource InputBackground}" BorderBrush="{DynamicResource InputBorder}"/>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Text="Tags (comma-separated)" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8"/>
+                            <TextBox x:Name="TaskTagsInput" Style="{StaticResource ModernTextBox}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+                        <Button Style="{StaticResource ModernButton}" Content="Cancel" Background="{DynamicResource TextSecondary}" Click="CancelDialog_Click" Width="120" Margin="0,0,12,0"/>
+                        <Button Style="{StaticResource ModernButton}" Content="Save Task" Click="SaveTask_Click" Width="120"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border><!-- Add Project Dialog -->
+        <Border x:Name="ProjectDialog" Grid.ColumnSpan="2" Background="#CC000000" Visibility="Collapsed">
+            <Border Background="{DynamicResource CardBackground}" Width="550" CornerRadius="16" Padding="32">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" Opacity="0.3" BlurRadius="30" ShadowDepth="0"/>
+                </Border.Effect>
+                <StackPanel>
+                    <Grid Margin="0,0,0,24">
+                        <TextBlock Text="Create New Project" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                        <Button Style="{StaticResource IconButton}" FontSize="20" HorizontalAlignment="Right" Click="CancelProjectDialog_Click" Padding="0">
+                            <Path Data="M90.914,5.296c6.927-7.034,18.188-7.065,25.154-0.068 c6.961,6.995,6.991,18.369,0.068,25.397L85.743,61.452l30.425,30.855c6.866,6.978,6.773,18.28-0.208,25.247 c-6.983,6.964-18.21,6.946-25.074-0.031L60.669,86.881L30.395,117.58c-6.927,7.034-18.188,7.065-25.154,0.068 c-6.961-6.995-6.992-18.369-0.068-25.397l30.393-30.827L5.142,30.568c-6.867-6.978-6.773-18.28,0.208-25.247 c6.983-6.963,18.21-6.946,25.074,0.031l30.217,30.643L90.914,5.296L90.914,5.296z" Stretch="Uniform" Width="25" Height="25" Fill="{DynamicResource InputBorder}"/>
+                        </Button>
+                    </Grid>
+                    <TextBlock Text="Project Name *" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8"/>
+                    <TextBox x:Name="ProjectNameInput" Style="{StaticResource ModernTextBox}" Margin="0,0,0,20"/>
+                    <TextBlock Text="Description" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8"/>
+                    <TextBox x:Name="ProjectDescriptionInput" Style="{StaticResource ModernTextBox}" TextWrapping="Wrap" AcceptsReturn="True" Height="100" Margin="0,0,0,20"/>
+                    <TextBlock Text="Color" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8"/>
+                    <ComboBox x:Name="ProjectColorInput" Style="{StaticResource ModernComboBox}" Margin="0,0,0,32"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource ModernButton}" Content="Cancel" Background="{DynamicResource TextSecondary}" Click="CancelProjectDialog_Click" Width="120" Margin="0,0,12,0"/>
+                        <Button Style="{StaticResource ModernButton}" Content="Create Project" Click="SaveProject_Click" Width="140"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border><!-- QR Code Dialog -->
+        <Border x:Name="QRCodeDialog" Grid.ColumnSpan="2" Background="#CC000000" Visibility="Collapsed">
+            <Border Background="{DynamicResource CardBackground}" Width="450" CornerRadius="16" Padding="32">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" Opacity="0.3" BlurRadius="30" ShadowDepth="0"/>
+                </Border.Effect>
+                <StackPanel>
+                    <Grid Margin="0,0,0,24">
+                        <TextBlock Text="Task QR Code" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center"/>
+                        <Button Style="{StaticResource IconButton}" Content="✕" FontSize="20" HorizontalAlignment="Right" Click="CloseQRDialog_Click"/>
+                    </Grid>
+                    <Border Background="White" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1" Padding="20" CornerRadius="12" HorizontalAlignment="Center">
+                        <Image x:Name="QRCodeImage" Width="280" Height="280" Stretch="Uniform"/>
+                    </Border>
+                    <TextBlock x:Name="QRCodeTaskTitle" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,20,0,8"/>
+                    <TextBlock Text="Scan to view task details on your device" FontSize="13" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+                    <Button Style="{StaticResource ModernButton}" Content="Close" Click="CloseQRDialog_Click" HorizontalAlignment="Center" Width="140"/>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</Page>
