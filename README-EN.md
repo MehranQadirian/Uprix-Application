@@ -7,7 +7,7 @@
 ![.NET](https://img.shields.io/badge/.NET-Framework%204.8-512BD4.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-**English** | **[فارسی](./README-FA.md)**
+**English** | **[فارسی](./README.md)**
 
 ### Smart Desktop Assistant for Managing Applications, Bookmarks, and Tasks
 
