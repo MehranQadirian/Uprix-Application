@@ -14,8 +14,8 @@ namespace AppLauncher.Classes.Core_Classes
         {
             try
             {
-                string fromEmail = "uprixmailsupp@gmail.com";
-                string fromPassword = "ghva ksbv lkip qwaj";
+                string fromEmail = "YOUR-GMAIL";
+                string fromPassword = "<YOUR-SECRET-PASS>";
 
                 string htmlBody = $@"
 <!DOCTYPE html>
