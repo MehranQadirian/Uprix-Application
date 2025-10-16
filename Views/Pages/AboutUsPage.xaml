@@ -77,7 +77,7 @@
                             <Border.Effect>
                                 <DropShadowEffect Color="#000000" Opacity="0.1" BlurRadius="12" ShadowDepth="2" RenderingBias="Performance"/>
                             </Border.Effect>
-                            <Image Source="/Uprix;component/icon-base.ico" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image Source="/Uprix Assistant;component/icon-base.ico" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
                         </Border><!-- App Info -->
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock x:Name="AppName" Text="Uprix Assistant" Style="{StaticResource TitleTextStyle}"/>

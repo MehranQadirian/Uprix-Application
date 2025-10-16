@@ -26,7 +26,7 @@ namespace AppLauncher.Classes.Core_Classes
             // Prevent multiple instances
             if (!_appMutex.WaitOne(TimeSpan.Zero, true))
             {
-                MessageBox.Show("Another instance of the application is already running.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Another instance of the application is already running.", "Error", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
                 Application.Current.Shutdown();
             }
         }
@@ -86,7 +86,7 @@ namespace AppLauncher.Classes.Core_Classes
                 {
                     if (i == retries - 1)
                     {
-                        MessageBox.Show($"Failed to open database after {retries} attempts: {ex.Message}", "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show($"Failed to open database after {retries} attempts: {ex.Message}", "Database Error", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
                         throw;
                     }
                     Thread.Sleep(delayMs); // Wait and retry

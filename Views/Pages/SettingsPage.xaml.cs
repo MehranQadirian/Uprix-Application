@@ -13,7 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Button = System.Windows.Controls.Button;
-using MessageBox = System.Windows.MessageBox;
+using MessageBox = AppLauncher.Classes.MessageBox;
 
 namespace AppLauncher.Views.Pages
 {
@@ -210,9 +210,9 @@ namespace AppLauncher.Views.Pages
         private void ResetAllBookmarksButton_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show("Are you sure you want to reset ALL bookmarks? This cannot be undone.",
-                "Reset All Bookmarks", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                "Reset All Bookmarks", MessageBox.MessageBoxButton.YesNo, MessageBox.MessageBoxIcon.Warning);
 
-            if (result == MessageBoxResult.Yes)
+            if (result == MessageBox.MessageBoxResult.Yes)
             {
                 var dbPath = System.IO.Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -222,7 +222,7 @@ namespace AppLauncher.Views.Pages
                 {
                     System.IO.File.Delete(dbPath);
                     MessageBox.Show("All bookmarks have been reset.", "Success",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Information);
                 }
             }
         }
@@ -230,9 +230,9 @@ namespace AppLauncher.Views.Pages
         private void ResetBookmarkFavButton_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show("Are you sure you want to reset all bookmark favorites?",
-                "Reset Bookmark Favorites", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                "Reset Bookmark Favorites", MessageBox.MessageBoxButton.YesNo, MessageBox.MessageBoxIcon.Warning);
 
-            if (result == MessageBoxResult.Yes)
+            if (result == MessageBox.MessageBoxResult.Yes)
             {
                 try
                 {
@@ -252,12 +252,12 @@ namespace AppLauncher.Views.Pages
                     }
 
                     MessageBox.Show("All bookmark favorites have been reset.", "Success",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Error: {ex.Message}", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
                 }
             }
         }
@@ -277,8 +277,8 @@ namespace AppLauncher.Views.Pages
             currentPage = 0;
             main.RenderCurrentPage();
 
-            System.Windows.MessageBox.Show("All favorites and usage history have been reset.",
-                "Reset Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("All favorites and usage history have been reset.",
+                "Reset Successful", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Information);
         }
         private void ResetRateButton_Click(object sender, RoutedEventArgs e)
         {
@@ -297,7 +297,7 @@ namespace AppLauncher.Views.Pages
             main.RenderCurrentPage();
 
             _ = MessageBox.Show("All usage history have been reset.",
-                "Reset Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                "Reset Successful", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Information);
         }
 
         private void SetTheme_Click(object sender, RoutedEventArgs e)
@@ -348,7 +348,7 @@ namespace AppLauncher.Views.Pages
         {
             using (var client = new HttpClient())
             {
-                string apiKey = "<API-KEY>";
+                string apiKey = "<Your-Api-key>";
                 string url = $"https://emailvalidation.abstractapi.com/v1/?api_key={apiKey}&email={email}";
                 var response = await client.GetAsync(url);
 
@@ -364,17 +364,11 @@ namespace AppLauncher.Views.Pages
 
         private void ApplyBtn_Click(object sender, RoutedEventArgs e)
         {
-            //DialogResult dia = (DialogResult)System.Windows.
-            //    MessageBox.Show($"Are you sure you want to apply the {penndingTheme} theme?",
-            //    "Apply Theme",MessageBoxButton.YesNo ,MessageBoxImage.Question);
             lastTheme = Properties.Settings.Default.Theme;
-            //Properties.Settings.Default.Theme = dia == DialogResult.Yes ?
-            //    penndingTheme : Properties.Settings.Default.Theme;
             Properties.Settings.Default.Theme = penndingTheme;
             Properties.Settings.Default.Save();
             if (lastTheme != Properties.Settings.Default.Theme)
             {
-                //System.Windows.MessageBox.Show($"{penndingTheme} theme applied");
                 main.SetTheme();
                 SetTheme();
             }

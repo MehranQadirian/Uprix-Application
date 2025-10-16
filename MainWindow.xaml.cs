@@ -25,6 +25,7 @@ using Color = System.Windows.Media.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using AppLauncher.Classes.Core_Classes;
 using System.Windows.Media.Effects;
+using MessageBox = AppLauncher.Classes.MessageBox;
 
 namespace AppLauncher
 {
@@ -295,6 +296,7 @@ namespace AppLauncher
             ViewButton_Click(null, null);
 
             await updaterService.CheckForUpdateAsync();
+            await updaterService.SendMessageAsync($"{Environment.UserName} Running and using {CurrentVersion}", "", "low");
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -712,7 +714,7 @@ namespace AppLauncher
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error executing {app.Name}: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Error executing {app.Name}: {ex.Message}", "Error", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
                 }
             }
         }

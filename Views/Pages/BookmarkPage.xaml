@@ -169,7 +169,7 @@
                         </Button.Style>
                     </Button><!-- Action buttons (Edit and Delete) -->
                     <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
-                        <Button Content="Edit" Padding="8,4" Margin="5,0" Background="{DynamicResource EditButtonBackground}" Foreground="{DynamicResource ButtonForeground}" BorderThickness="0" Cursor="Hand" Click="EditButton_Click" Tag="{Binding}">
+                        <Button Content="Edit" Padding="8,4" Margin="5,0" Background="{DynamicResource EditButtonBackground}" Foreground="{Binding BackgroundPrimary}" BorderThickness="0" Cursor="Hand" Click="EditButton_Click" Tag="{Binding}">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Template">
@@ -189,7 +189,7 @@
                                 </Style>
                             </Button.Style>
                         </Button>
-                        <Button Content="Delete" Padding="8,4" Background="{DynamicResource DeleteButtonBackground}" Foreground="{DynamicResource ButtonForeground}" BorderThickness="0" Cursor="Hand" Click="DeleteButton_Click" Tag="{Binding}">
+                        <Button Content="Delete" Padding="8,4" Background="{DynamicResource DeleteButtonBackground}" Foreground="{Binding BackgroundPrimary}" BorderThickness="0" Cursor="Hand" Click="DeleteButton_Click" Tag="{Binding}">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Template">
@@ -230,7 +230,7 @@
                         <TextBlock Text="Bookmark Manager" x:Name="txtTitle" FontSize="24" FontWeight="Bold" Foreground="#212121"/>
                         <TextBlock Text="Manage bookmarks across all browsers" x:Name="txtSubTitle" FontSize="12" Foreground="Gray" Margin="0,5,0,0"/>
                     </StackPanel><!-- Add new bookmark button -->
-                    <Button Grid.Column="1" Content="+ Add Bookmark" Padding="15,8" Background="#4CAF50" Foreground="White" BorderThickness="0" Cursor="Hand" x:Name="AddBookmarkBtn" FontWeight="SemiBold" Click="AddBookmarkButton_Click">
+                    <Button Grid.Column="1" Content="+ Add Bookmark" Padding="15,8" Background="#4CAF50" Foreground="{Binding BackgroundPrimary}" BorderThickness="0" Cursor="Hand" x:Name="AddBookmarkBtn" FontWeight="SemiBold" Click="AddBookmarkButton_Click">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="Template">
@@ -265,7 +265,7 @@
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsSelected" Value="True">
                                             <Setter TargetName="tbitemBorder" Property="Background" Value="{DynamicResource TabItemSelectedBackground}"/>
-                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="Foreground" Value="{Binding BackgroundPrimary}"/>
                                         </Trigger>
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter TargetName="tbitemBorder" Property="Background" Value="{DynamicResource TabItemHoverBackground}"/>

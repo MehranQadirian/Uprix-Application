@@ -12,9 +12,13 @@ using System.Linq;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
+using MessageBox = AppLauncher.Classes.MessageBox;
 
 namespace AppLauncher.Views.Pages
 {
@@ -141,7 +145,7 @@ namespace AppLauncher.Views.Pages
             catch (Exception ex)
             {
                 // Add logging to catch block
-                MessageBox.Show($"Error in constructor: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error in constructor: {ex.Message}", "Error", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -269,7 +273,7 @@ namespace AppLauncher.Views.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading bookmarks: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error loading bookmarks: {ex.Message}", "Error", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -660,7 +664,7 @@ namespace AppLauncher.Views.Pages
         // + Add Bookmark: creates a simple dialog to gather fields and adds to DB (and optionally to browser)
         private void AddBookmarkButton_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new AddEditBookmarkWindow(SupportedBrowsers);
+            var dlg = new AddEditBookmarkWindow(SupportedBrowsers, apply);
             dlg.Owner = Window.GetWindow(this);
             dlg.Title = "Add Bookmark";
             if (dlg.ShowDialog() == true)
@@ -715,12 +719,12 @@ namespace AppLauncher.Views.Pages
                 //        : "Could not modify browser bookmark file. The file may be locked or in an unsupported format.";
 
                 //    MessageBox.Show($"Added to database for {chosenBrowser}.\n\n{reason}",
-                //        "Partial Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                //        "Partial Success", MessageBox.MessageBoxButton.OK, MessageBoxImage.Information);
                 //}
                 //else
                 //{
                 //    MessageBox.Show($"Successfully added to {chosenBrowser} and database.",
-                //        "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                //        "Success", MessageBox.MessageBoxButton.OK, MessageBoxImage.Information);
                 //}
             }
         }
@@ -753,7 +757,7 @@ namespace AppLauncher.Views.Pages
             e.Handled = true;
             if (sender is Button btn && btn.Tag is BookmarkModel model)
             {
-                var dlg = new AddEditBookmarkWindow(SupportedBrowsers,model.Browser,model.Rate, model.Text, model.URL, model.Favorite);
+                var dlg = new AddEditBookmarkWindow(SupportedBrowsers, apply, model.Browser, model.Rate, model.Text, model.URL, model.Favorite);
                 dlg.Owner = Window.GetWindow(this);
                 dlg.Title = "Edit Bookmark";
                 if (dlg.ShowDialog() == true)
@@ -796,7 +800,7 @@ namespace AppLauncher.Views.Pages
 
                     //MessageBox.Show(browserEdited
                     //    ? $"Bookmark edited in {model.Browser} and in database."
-                    //    : $"Database updated. Could not edit bookmark in {model.Browser} automatically.", "Edit Bookmark", MessageBoxButton.OK, MessageBoxImage.Information);
+                    //    : $"Database updated. Could not edit bookmark in {model.Browser} automatically.", "Edit Bookmark", MessageBox.MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
@@ -807,8 +811,8 @@ namespace AppLauncher.Views.Pages
             e.Handled = true;
             if (sender is Button btn && btn.Tag is BookmarkModel model)
             {
-                var res = MessageBox.Show($"Delete bookmark '{model.Text}' from database and from browser {model.Browser} if present?", "Delete Bookmark", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (res != MessageBoxResult.Yes) return;
+                var res = MessageBox.Show($"Delete bookmark '{model.Text}' from database and from browser {model.Browser} if present?", "Delete Bookmark", MessageBox.MessageBoxButton.YesNo, MessageBox.MessageBoxIcon.Warning);
+                if (res != MessageBox.MessageBoxResult.Yes) return;
 
                 bool browserDeleted = false;
                 try
@@ -838,7 +842,7 @@ namespace AppLauncher.Views.Pages
 
                 MessageBox.Show(browserDeleted
                     ? $"Deleted from {model.Browser} and database."
-                    : $"Removed from database. Could not delete from {model.Browser} automatically.", "Delete Bookmark", MessageBoxButton.OK, MessageBoxImage.Information);
+                    : $"Removed from database. Could not delete from {model.Browser} automatically.", "Delete Bookmark", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Information);
             }
         }
 
@@ -848,7 +852,7 @@ namespace AppLauncher.Views.Pages
         // Bookmark_DragOver allows drop only when target is a different browser or same browser (we accept both).
         // Bookmark_Drop handles adding bookmark to the target browser and DB.
         // -------------------------
-        
+
         private void Bookmark_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             // Check if click was on a button
@@ -941,7 +945,7 @@ namespace AppLauncher.Views.Pages
             try
             {
                 string browserPath = GetBrowserExecutablePath(browserName);
-                                
+
                 // Launch browser with URL
                 if (!string.IsNullOrEmpty(browserPath) && File.Exists(browserPath))
                 {
@@ -985,7 +989,7 @@ namespace AppLauncher.Views.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to open bookmark: " + ex.Message, "Open Bookmark", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Failed to open bookmark: " + ex.Message, "Open Bookmark", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
         // Generic helper
@@ -1066,12 +1070,12 @@ namespace AppLauncher.Views.Pages
                 //        : "Could not modify browser bookmark file. The file may be locked or in an unsupported format.";
 
                 //    MessageBox.Show($"Added to database for {targetBrowser}.\n\n{reason}",
-                //        "Partial Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                //        "Partial Success", MessageBox.MessageBoxButton.OK, MessageBoxImage.Information);
                 //}
                 //else
                 //{
                 //    MessageBox.Show($"Successfully added to {targetBrowser} and database.",
-                //        "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                //        "Success", MessageBox.MessageBoxButton.OK, MessageBoxImage.Information);
                 //}
             }
         }
@@ -1187,12 +1191,12 @@ namespace AppLauncher.Views.Pages
                 LoadBookmarksFromDb();
                 BuildBrowserTabs();
 
-                MessageBox.Show(/*browserAdded ?*/ $"Added to {targetBrowser} and database." /*: $"Added to database for {targetBrowser}. Could not auto-add to browser file."*/, "Drag & Drop", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(/*browserAdded ?*/ $"Added to {targetBrowser} and database." /*: $"Added to database for {targetBrowser}. Could not auto-add to browser file."*/, "Drag & Drop", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Information);
             }
             else
             {
                 // Dropped into same browser - treat as noop (we do not reorder).
-                //MessageBox.Show("Dropped into the same browser - no action taken.", "Drag & Drop", MessageBoxButton.OK, MessageBoxImage.Information);
+                //MessageBox.Show("Dropped into the same browser - no action taken.", "Drag & Drop", MessageBox.MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -1234,85 +1238,244 @@ namespace AppLauncher.Views.Pages
             private CheckBox _favBox;
             private ComboBox _browserCombo;
             private ComboBox _rateCombo;
-
-            public AddEditBookmarkWindow(List<string> supportedBrowser, string browser = "Chrome" , RateState rate = RateState.Normal, string title = "", string url = "", bool favorite = false)
+            private ApplyThemes apply;
+            public AddEditBookmarkWindow(
+    List<string> supportedBrowser,
+    ApplyThemes aply,
+    string browser = "Chrome",
+    RateState rate = RateState.Normal,
+    string title = "",
+    string url = "",
+    bool favorite = false)
             {
-                var browserList = supportedBrowser;
-
-                //// Add custom browsers
-                //try
-                //{
-                //    string browsersJson = Properties.Settings.Default.CustomBrowsers;
-                //    if (!string.IsNullOrEmpty(browsersJson))
-                //    {
-                //        var customBrowsers = Newtonsoft.Json.JsonConvert.DeserializeObject<List<CustomBrowserConfig>>(browsersJson);
-                //        if (customBrowsers != null)
-                //        {
-                //            browserList.AddRange(customBrowsers.Select(b => b.Name));
-                //        }
-                //    }
-                //}
-                //catch { }
-
-                
+                // === Initialization ===
+                apply = aply;
                 Width = 420;
                 Height = 300;
+                Title = "Add / Edit Bookmark";
                 WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 ResizeMode = ResizeMode.NoResize;
-                Title = "Add / Edit Bookmark";
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundPrimary));
+
                 BrowserName = browser;
                 TitleText = title;
                 UrlText = url;
                 IsFavorite = favorite;
 
-                var grid = new Grid { Margin = new Thickness(12) };
-                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                var browserList = supportedBrowser;
 
+                // === Main Grid Layout ===
+                var grid = new Grid { Margin = new Thickness(12) };
+
+                // Define Rows
+                for (int i = 0; i < 6; i++)
+                    grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                // Define Columns
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-                grid.Add(new Label { Content = "Browser:", VerticalAlignment = VerticalAlignment.Center }, 0, 0);
-                _browserCombo = new ComboBox { ItemsSource = browserList, SelectedValue = browser, Margin = new Thickness(4) };
-                _browserCombo.SelectedValue = browser;
+                Brush labelColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.MenuIconColor));
+                Brush textBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(apply.BackgroundSecundary));
+                Brush textForeground = labelColor;
+
+                // === Browser Combo ===
+                grid.Add(new Label { Content = "Browser:", VerticalAlignment = VerticalAlignment.Center, Foreground = labelColor }, 0, 0);
+                _browserCombo = new ComboBox
+                {
+                    ItemsSource = browserList,
+                    SelectedValue = browser,
+                    Margin = new Thickness(4),
+                    Style = FindResource("DarkComboBox") as Style
+                };
                 grid.Add(_browserCombo, 1, 0);
 
-                grid.Add(new Label { Content = "Rate:", VerticalAlignment = VerticalAlignment.Center }, 0, 1);
-                _rateCombo = new ComboBox { ItemsSource = new List<string> { RateState.Normal.ToString(),
-                                                                                RateState.Warning.ToString(),
-                                                                                RateState.Critical.ToString(),
-                                                                                RateState.Emergency.ToString(), }, SelectedValue = rate.ToString(), Margin = new Thickness(4) };
-                _rateCombo.SelectedValue = rate.ToString();
+                // === Rate Combo ===
+                grid.Add(new Label { Content = "Rate:", VerticalAlignment = VerticalAlignment.Center, Foreground = labelColor }, 0, 1);
+                _rateCombo = new ComboBox
+                {
+                    ItemsSource = new List<string>
+        {
+            RateState.Normal.ToString(),
+            RateState.Warning.ToString(),
+            RateState.Critical.ToString(),
+            RateState.Emergency.ToString()
+        },
+                    SelectedValue = rate.ToString(),
+                    Margin = new Thickness(4),
+                    Style = FindResource("DarkComboBox") as Style
+                };
                 grid.Add(_rateCombo, 1, 1);
 
-                grid.Add(new Label { Content = "Title:", VerticalAlignment = VerticalAlignment.Center }, 0, 2);
-                _titleBox = new TextBox { Text = title, Margin = new Thickness(4) };
+                // === Title TextBox ===
+                grid.Add(new Label { Content = "Title:", VerticalAlignment = VerticalAlignment.Center, Foreground = labelColor }, 0, 2);
+                _titleBox = new TextBox
+                {
+                    Text = title,
+                    Margin = new Thickness(4),
+                    BorderThickness = new Thickness(0),
+                    Background = textBackground,
+                    Foreground = textForeground
+                };
                 grid.Add(_titleBox, 1, 2);
 
-                grid.Add(new Label { Content = "URL:", VerticalAlignment = VerticalAlignment.Center }, 0, 3);
-                _urlBox = new TextBox { Text = url, Margin = new Thickness(4) };
+                // === URL TextBox ===
+                grid.Add(new Label { Content = "URL:", VerticalAlignment = VerticalAlignment.Center, Foreground = labelColor }, 0, 3);
+                _urlBox = new TextBox
+                {
+                    Text = url,
+                    Margin = new Thickness(4),
+                    BorderThickness = new Thickness(0),
+                    Background = textBackground,
+                    Foreground = textForeground
+                };
                 grid.Add(_urlBox, 1, 3);
 
-                grid.Add(new Label { Content = "Favorite:", VerticalAlignment = VerticalAlignment.Center }, 0, 4);
-                _favBox = new CheckBox { IsChecked = favorite, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(4) };
+                // === Favorite CheckBox ===
+                grid.Add(new Label { Content = "Favorite:", VerticalAlignment = VerticalAlignment.Center, Foreground = labelColor }, 0, 4);
+                _favBox = new CheckBox
+                {
+                    IsChecked = favorite,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(4),
+                    Content = "Favorite"
+                };
+                _favBox.Style = CreateAnimatedDarkCheckBoxStyle();
                 grid.Add(_favBox, 1, 4);
 
-                var panel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 10, 0, 0) };
-                var ok = new Button { Content = "OK", Width = 80, Margin = new Thickness(6) };
-                var cancel = new Button { Content = "Cancel", Width = 80, Margin = new Thickness(6) };
-                ok.Click += Ok_Click;
-                cancel.Click += (s, e) => { DialogResult = false; Close(); };
-                panel.Children.Add(ok);
-                panel.Children.Add(cancel);
-                Grid.SetRow(panel, 4);
-                Grid.SetColumnSpan(panel, 2);
-                grid.Children.Add(panel);
+                // === Buttons Panel ===
+                var buttonPanel = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Margin = new Thickness(0, 12, 0, 0)
+                };
 
+                var okButton = new Button
+                {
+                    Content = "OK",
+                    Width = 80,
+                    Margin = new Thickness(6),
+                    Style = FindResource("AnimatedNavButton") as Style
+                };
+                okButton.Click += Ok_Click;
+
+                var cancelButton = new Button
+                {
+                    Content = "Cancel",
+                    Width = 80,
+                    Margin = new Thickness(6),
+                    Style = FindResource("AnimatedNavButton") as Style
+                };
+                cancelButton.Click += (s, e) => { DialogResult = false; Close(); };
+
+                buttonPanel.Children.Add(okButton);
+                buttonPanel.Children.Add(cancelButton);
+
+                Grid.SetRow(buttonPanel, 5);
+                Grid.SetColumnSpan(buttonPanel, 2);
+                grid.Children.Add(buttonPanel);
+
+                // === Final Content ===
                 Content = grid;
+            }
+            private Style CreateAnimatedDarkCheckBoxStyle()
+            {
+                var style = new Style(typeof(CheckBox));
+                style.Setters.Add(new Setter(Control.ForegroundProperty, Brushes.White));
+                style.Setters.Add(new Setter(Control.FontWeightProperty, FontWeights.SemiBold));
+                style.Setters.Add(new Setter(Control.CursorProperty, System.Windows.Input.Cursors.Hand));
+
+                var template = new ControlTemplate(typeof(CheckBox));
+
+                // ساختار بصری
+                var stack = new FrameworkElementFactory(typeof(StackPanel));
+                stack.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+                stack.SetValue(StackPanel.VerticalAlignmentProperty, VerticalAlignment.Center);
+
+                var grid = new FrameworkElementFactory(typeof(Grid));
+                grid.SetValue(FrameworkElement.WidthProperty, 20.0);
+                grid.SetValue(FrameworkElement.HeightProperty, 20.0);
+                grid.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 0, 6, 0));
+
+                var border = new FrameworkElementFactory(typeof(Border));
+                border.Name = "Border";
+                border.SetValue(Border.CornerRadiusProperty, new CornerRadius(5));
+                border.SetValue(Border.BackgroundProperty, new SolidColorBrush((Color)ColorConverter.ConvertFromString("#222")));
+                border.SetValue(Border.BorderBrushProperty, new SolidColorBrush((Color)ColorConverter.ConvertFromString("#555")));
+                border.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+                border.SetValue(Border.EffectProperty, new DropShadowEffect
+                {
+                    BlurRadius = 5,
+                    ShadowDepth = 0,
+                    Color = Colors.Black
+                });
+                grid.AppendChild(border);
+
+                var path = new FrameworkElementFactory(typeof(System.Windows.Shapes.Path));
+                path.Name = "CheckMark";
+                path.SetValue(System.Windows.Shapes.Path.DataProperty, Geometry.Parse("M4,10 L8,14 L16,5"));
+                path.SetValue(System.Windows.Shapes.Path.StrokeProperty, new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6F61")));
+                path.SetValue(System.Windows.Shapes.Path.StrokeThicknessProperty, 2.0);
+                path.SetValue(System.Windows.Shapes.Path.StrokeStartLineCapProperty, PenLineCap.Round);
+                path.SetValue(System.Windows.Shapes.Path.StrokeEndLineCapProperty, PenLineCap.Round);
+                path.SetValue(UIElement.OpacityProperty, 0.0);
+                grid.AppendChild(path);
+
+                stack.AppendChild(grid);
+                var contentPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+                contentPresenterFactory.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+                stack.AppendChild(contentPresenterFactory);
+
+
+                template.VisualTree = stack;
+
+                // انیمیشن‌ها
+                var checkedTrigger = new Trigger { Property = ToggleButton.IsCheckedProperty, Value = true };
+                var hoverTrigger = new Trigger { Property = UIElement.IsMouseOverProperty, Value = true };
+
+                // Checked Animations
+                var sbChecked = new Storyboard();
+                sbChecked.Children.Add(CreateDoubleAnim("CheckMark", UIElement.OpacityProperty, 1, 0.2));
+                sbChecked.Children.Add(CreateColorAnim("Border", "(Border.BorderBrush).(SolidColorBrush.Color)", "#FF6F61", 0.25));
+                sbChecked.Children.Add(CreateColorAnim("Border", "(Border.Background).(SolidColorBrush.Color)", "#333", 0.25));
+                checkedTrigger.EnterActions.Add(new BeginStoryboard { Storyboard = sbChecked });
+
+                // Unchecked
+                var sbUnchecked = new Storyboard();
+                sbUnchecked.Children.Add(CreateDoubleAnim("CheckMark", UIElement.OpacityProperty, 0, 0.2));
+                sbUnchecked.Children.Add(CreateColorAnim("Border", "(Border.BorderBrush).(SolidColorBrush.Color)", "#555", 0.25));
+                sbUnchecked.Children.Add(CreateColorAnim("Border", "(Border.Background).(SolidColorBrush.Color)", "#222", 0.25));
+                checkedTrigger.ExitActions.Add(new BeginStoryboard { Storyboard = sbUnchecked });
+
+                // Hover
+                hoverTrigger.Setters.Add(new Setter(Border.BorderBrushProperty,
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6F61")), "Border"));
+                hoverTrigger.Setters.Add(new Setter(Border.BackgroundProperty,
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2E2E2E")), "Border"));
+
+                template.Triggers.Add(checkedTrigger);
+                template.Triggers.Add(hoverTrigger);
+
+                style.Setters.Add(new Setter(Control.TemplateProperty, template));
+                return style;
+            }
+
+            // توابع کمکی برای انیمیشن
+            private DoubleAnimation CreateDoubleAnim(string target, DependencyProperty prop, double to, double sec)
+            {
+                var anim = new DoubleAnimation(to, TimeSpan.FromSeconds(sec));
+                Storyboard.SetTargetName(anim, target);
+                Storyboard.SetTargetProperty(anim, new PropertyPath(prop));
+                return anim;
+            }
+
+            private ColorAnimation CreateColorAnim(string target, string propPath, string colorHex, double sec)
+            {
+                var anim = new ColorAnimation((Color)ColorConverter.ConvertFromString(colorHex), TimeSpan.FromSeconds(sec));
+                Storyboard.SetTargetName(anim, target);
+                Storyboard.SetTargetProperty(anim, new PropertyPath(propPath));
+                return anim;
             }
 
             private void Ok_Click(object sender, RoutedEventArgs e)
@@ -1324,7 +1487,7 @@ namespace AppLauncher.Views.Pages
                 RateName = _rateCombo.SelectedValue?.ToString() ?? "Normal";
                 if (string.IsNullOrEmpty(UrlText))
                 {
-                    MessageBox.Show("URL is required.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("URL is required.", "Validation", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -1345,7 +1508,7 @@ namespace AppLauncher.Views.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error during unload: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error during unload: {ex.Message}", "Error", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
     }

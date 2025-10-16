@@ -12,6 +12,9 @@ using System.IO;
 using System.Text;
 using AppLauncher.Classes.Core_Classes;
 using AppLauncher.Classes;
+using System.Windows.Media.Animation;
+using System.Threading.Tasks;
+using MessageBox = AppLauncher.Classes.MessageBox;
 
 namespace AppLauncher.Views.Pages
 {
@@ -105,24 +108,24 @@ namespace AppLauncher.Views.Pages
 
                 // Border and Text Colors
                 CardBorder = apply.BackgroundLightPart,
-                TextPrimary = apply.ForegroundPrimary, 
-                TextSecondary = apply.ForegroundSecundary, 
-                TextMuted = apply.ForegroundStatus, 
+                TextPrimary = apply.ForegroundPrimary,
+                TextSecondary = apply.ForegroundSecundary,
+                TextMuted = apply.ForegroundStatus,
 
                 // Sidebar Colors
                 SidebarBackground = apply.BackgroundSecundary,
-                SidebarBorder = apply.BackgroundLightPart,  
-                SidebarText = apply.ForegroundPrimary,  
-                HoverBackground = apply.BackgroundSelectedTile,  
+                SidebarBorder = apply.BackgroundLightPart,
+                SidebarText = apply.ForegroundPrimary,
+                HoverBackground = apply.BackgroundSelectedTile,
 
                 // Input and Progress Colors
                 SelectedBackground = apply.BackgroundLightPart,
-                ProgressBackground = apply.BackgroundLightPart, 
+                ProgressBackground = apply.BackgroundLightPart,
                 InputBackground = apply.BackgroundPrimary,
 
                 // Border Colors
-                InputBorder = apply.MenuIconColor, 
-                InputFocusBorder = apply.MenuIconColor, 
+                InputBorder = apply.MenuIconColor,
+                InputFocusBorder = apply.MenuIconColor,
                 CaretBrushTextBoxes = apply.MenuIconColor
             });
         }
@@ -210,7 +213,7 @@ namespace AppLauncher.Views.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Database initialization error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Database initialization error: {ex.Message}", "Error", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -840,7 +843,7 @@ namespace AppLauncher.Views.Pages
             catch (Exception ex)
             {
                 MessageBox.Show($"Error showing all tasks: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -865,7 +868,7 @@ namespace AppLauncher.Views.Pages
             catch (Exception ex)
             {
                 MessageBox.Show($"Error showing today's tasks: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -890,7 +893,7 @@ namespace AppLauncher.Views.Pages
             catch (Exception ex)
             {
                 MessageBox.Show($"Error showing completed tasks: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -915,7 +918,7 @@ namespace AppLauncher.Views.Pages
             catch (Exception ex)
             {
                 MessageBox.Show($"Error showing daily report: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                   MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -946,8 +949,11 @@ namespace AppLauncher.Views.Pages
             if (sender is Button button && button.Tag is ProjectModel project)
             {
                 var result = MessageBox.Show($"Are you sure you want to delete '{project.Name}'? This will delete all associated tasks.",
-                                             "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (result == MessageBoxResult.Yes)
+                              "Confirm Delete",
+                              MessageBox.MessageBoxButton.YesNo,
+                              MessageBox.MessageBoxIcon.Warning);
+
+                if (result == MessageBox.MessageBoxResult.Yes)
                 {
                     // Delete associated tasks
                     _tasksCollection.DeleteMany(t => t.ProjectId == project.Id);
@@ -982,9 +988,21 @@ namespace AppLauncher.Views.Pages
 
         private void RefreshData_Click(object sender, RoutedEventArgs e)
         {
+            // Run Animation
+            var rotateAnimation = new DoubleAnimation
+            {
+                From = 0,
+                To = 540,
+                Duration = TimeSpan.FromSeconds(0.8),
+                EasingFunction = new CircleEase { EasingMode = EasingMode.EaseInOut }
+            };
+
+            RefreshRotate.BeginAnimation(RotateTransform.AngleProperty, rotateAnimation);
+            // Process
             LoadProjects();
             RefreshTasksView();
         }
+
 
         #endregion
 
@@ -1087,14 +1105,14 @@ namespace AppLauncher.Views.Pages
             if (string.IsNullOrWhiteSpace(TaskTitleInput.Text))
             {
                 MessageBox.Show("Please enter a task title.", "Validation Error",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Warning);
                 return;
             }
 
             if (TaskProjectInput.SelectedItem == null)
             {
                 MessageBox.Show("Please select a project.", "Validation Error",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Warning);
                 return;
             }
 
@@ -1290,10 +1308,9 @@ namespace AppLauncher.Views.Pages
                 var result = MessageBox.Show(
                     $"Are you sure you want to delete the task '{task.Title}'?",
                     "Confirm Delete",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
+                    MessageBox.MessageBoxButton.YesNo, MessageBox.MessageBoxIcon.Question);
 
-                if (result == MessageBoxResult.Yes)
+                if (result == MessageBox.MessageBoxResult.Yes)
                 {
                     // Delete all subtasks
                     if (task.SubTasks != null && task.SubTasks.Count > 0)
@@ -1331,10 +1348,9 @@ namespace AppLauncher.Views.Pages
                 var result = MessageBox.Show(
                     $"Are you sure you want to delete the subtask '{subtask.Title}'?",
                     "Confirm Delete",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
+                    MessageBox.MessageBoxButton.YesNo, MessageBox.MessageBoxIcon.Question);
 
-                if (result == MessageBoxResult.Yes)
+                if (result == MessageBox.MessageBoxResult.Yes)
                 {
                     _tasksCollection.Delete(subtask.Id);
 
@@ -1384,7 +1400,7 @@ namespace AppLauncher.Views.Pages
 
                 if (string.IsNullOrEmpty(name))
                 {
-                    MessageBox.Show("Project name is required.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Project name is required.", "Error", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -1421,7 +1437,7 @@ namespace AppLauncher.Views.Pages
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving project: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error saving project: {ex.Message}", "Error", MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -1472,7 +1488,7 @@ namespace AppLauncher.Views.Pages
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Error generating QR code: {ex.Message}", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
                 }
             }
         }
@@ -1533,27 +1549,72 @@ namespace AppLauncher.Views.Pages
         {
             try
             {
-                if (SidebarColumn.Width.Value > 0)
+                double from, to;
+                bool collapsing;
+
+                if (SidebarColumn.ActualWidth > 0)
                 {
-                    // Collapse sidebar
-                    SidebarColumn.Width = new GridLength(0);
-                    CollapseSidebarButton.Visibility = Visibility.Collapsed;
-                    ExpandSidebarButton.Visibility = Visibility.Visible;
+                    from = SidebarColumn.ActualWidth;
+                    to = 0;
+                    collapsing = true;
                 }
                 else
                 {
-                    // Expand sidebar
-                    SidebarColumn.Width = new GridLength(280);
-                    CollapseSidebarButton.Visibility = Visibility.Visible;
-                    ExpandSidebarButton.Visibility = Visibility.Collapsed;
+                    from = 0;
+                    to = 280;
+                    collapsing = false;
                 }
+
+                var fade = new DoubleAnimation
+                {
+                    From = collapsing ? 1 : 0,
+                    To = collapsing ? 0 : 1,
+                    Duration = TimeSpan.FromMilliseconds(200),
+                    FillBehavior = FillBehavior.Stop
+                };
+                SidebarPanel.BeginAnimation(UIElement.OpacityProperty, fade);
+
+                var widthAnimation = new GridLengthAnimation
+                {
+                    From = new GridLength(from),
+                    To = new GridLength(to),
+                    Duration = TimeSpan.FromMilliseconds(300),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+                };
+
+                SidebarColumn.BeginAnimation(ColumnDefinition.WidthProperty, widthAnimation);
+
+                var timer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(310)
+                };
+                timer.Tick += (s, _) =>
+                {
+                    timer.Stop();
+
+                    if (collapsing)
+                    {
+                        SidebarColumn.Width = new GridLength(0);
+                        CollapseSidebarButton.Visibility = Visibility.Collapsed;
+                        ExpandSidebarButton.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        SidebarColumn.Width = new GridLength(280);
+                        CollapseSidebarButton.Visibility = Visibility.Visible;
+                        ExpandSidebarButton.Visibility = Visibility.Collapsed;
+                    }
+                };
+                timer.Start();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error toggling sidebar: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
+
+
 
         private void ShowUpcomingTasks_Click(object sender, RoutedEventArgs e)
         {
@@ -1567,7 +1628,7 @@ namespace AppLauncher.Views.Pages
             catch (Exception ex)
             {
                 MessageBox.Show($"Error showing upcoming tasks: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -1591,7 +1652,7 @@ namespace AppLauncher.Views.Pages
             catch (Exception ex)
             {
                 MessageBox.Show($"Error sorting tasks: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -1608,19 +1669,31 @@ namespace AppLauncher.Views.Pages
             catch (Exception ex)
             {
                 MessageBox.Show($"Error filtering tasks: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
-        private void ExportTasks_Click(object sender, RoutedEventArgs e)
+        private async void ExportTasks_Click(object sender, RoutedEventArgs e)
         {
+            // Run Animation
+            var moveUpAnimation = new DoubleAnimation
+            {
+                From = 0,
+                To = -6,
+                Duration = TimeSpan.FromSeconds(0.2),
+                AutoReverse = true,
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+            };
+            ExportTranslate.BeginAnimation(TranslateTransform.YProperty, moveUpAnimation);
+            await Task.Delay(150);
+
             try
             {
                 var tasks = _tasksCollection.Find(t => t.ParentTaskId == null).ToList();
                 if (tasks.Count == 0)
                 {
                     MessageBox.Show("No tasks to export.", "Info",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
                     return;
                 }
 
@@ -1650,13 +1723,13 @@ namespace AppLauncher.Views.Pages
 
                     File.WriteAllText(saveFileDialog.FileName, sb.ToString());
                     MessageBox.Show("Tasks exported successfully.", "Success",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error exporting tasks: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
 
@@ -1781,7 +1854,7 @@ namespace AppLauncher.Views.Pages
             catch (Exception ex)
             {
                 MessageBox.Show($"Error updating quick stats: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.MessageBoxButton.OK, MessageBox.MessageBoxIcon.Error);
             }
         }
         #region Daily Report

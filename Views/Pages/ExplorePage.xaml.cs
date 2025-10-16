@@ -10,6 +10,7 @@ using AppLauncher.Classes;
 using AppLauncher.Classes.Core_Classes;
 using AppLauncher.Configuration;
 using AppLauncher.Models;
+using MessageBox = AppLauncher.Classes.MessageBox;
 
 namespace AppLauncher.Views.Pages
 {
@@ -219,8 +220,8 @@ namespace AppLauncher.Views.Pages
                 MessageBox.Show(
                     $"{feature.Title} is not available yet.",
                     "Feature Unavailable",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
+                    MessageBox.MessageBoxButton.OK,
+                    MessageBox.MessageBoxIcon.Information
                 );
                 return;
             }
@@ -242,8 +243,8 @@ namespace AppLauncher.Views.Pages
                     MessageBox.Show(
                         $"Would open external URL for: {feature.Title}",
                         "External Link",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information
+                        MessageBox.MessageBoxButton.OK,
+                        MessageBox.MessageBoxIcon.Information
                     );
                     // Example: System.Diagnostics.Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
                     break;
@@ -287,8 +288,8 @@ namespace AppLauncher.Views.Pages
                     MessageBox.Show(
                         $"Custom action not implemented for: {feature.Title}",
                         "Custom Action",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information
+                        MessageBox.MessageBoxButton.OK,
+                        MessageBox.MessageBoxIcon.Information
                     );
                     break;
             }
